@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>View Cars</title>
+    <link rel="stylesheet" th:href="@{/css/view_cars.css}">
+</head>
+<body>
+    <div>
+        <h1>View Cars</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>Make</th>
+                    <th>Model</th>
+                    <th>Year</th>
+                    <th>Price</th>
+                    <th>Description</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="car : ${cars}">
+                    <td th:text="${car.make}"></td>
+                    <td th:text="${car.model}"></td>
+                    <td th:text="${car.registrationYear}"></td>
+                    <td th:text="${car.price}"></td>
+                    <td th:text="${car.description}"></td>
+                    <td>
+                        <form th:action="@{'/admin/cars/activate/' + ${car.id}}" method="post">
+                            <button type="submit">Activate</button>
+                        </form>
+                        <form th:action="@{'/admin/cars/deactivate/' + ${car.id}}" method="post">
+                            <button type="submit">Deactivate</button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
