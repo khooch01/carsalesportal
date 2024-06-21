@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Login</title>
-    <link rel="stylesheet" th:href="@{/css/login.css}">
+    <link rel="stylesheet" th:href="@{/login.css}">
 </head>
 <body>
     <div>
@@ -19,13 +19,11 @@
             </div>
             <div>
                 <button type="submit">Login</button>
+                <button type="button" onclick="window.location.href='/registration'">Register</button>
             </div>
         </form>
         <div th:if="${param.error}">
             <p style="color: red;">Invalid username or password.</p>
-        </div>
-        <div>
-            <a th:href="@{/registration}">Register</a>
         </div>
     </div>
 </body>

@@ -3,48 +3,52 @@ package com.khooch.carsalesportal.service.impl;
 import com.khooch.carsalesportal.entity.Appointment;
 import com.khooch.carsalesportal.repository.AppointmentRepository;
 import com.khooch.carsalesportal.service.AppointmentService;
-import com.khooch.carsalesportal.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class AppointmentServiceImpl implements AppointmentService {
 
-    @Autowired
-    private AppointmentRepository appointmentRepository;
+    private final AppointmentRepository appointmentRepository;
 
     @Autowired
-    private UserService userService;
+    public AppointmentServiceImpl(AppointmentRepository appointmentRepository) {
+        this.appointmentRepository = appointmentRepository;
+    }
 
     @Override
-    public void bookAppointment(Appointment appointment, String username) {
-        appointment.setUser(userService.findByUsername(username));
-        appointmentRepository.save(appointment);
+    public Appointment bookAppointment(Appointment appointment, String username) {
+        appointment.setUsername(username);
+        return appointmentRepository.save(appointment);
     }
 
     @Override
     public void approveAppointment(Long id) {
-        Appointment appointment = appointmentRepository.findById(id).orElseThrow(() -> new RuntimeException("Appointment not found"));
+        Appointment appointment = appointmentRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid appointment Id:" + id));
         appointment.setApproved(true);
         appointmentRepository.save(appointment);
     }
 
     @Override
     public void denyAppointment(Long id) {
-        Appointment appointment = appointmentRepository.findById(id).orElseThrow(() -> new RuntimeException("Appointment not found"));
-        appointment.setApproved(false);
-        appointmentRepository.save(appointment);
+        appointmentRepository.deleteById(id);
     }
 
     @Override
-    public Object findAll() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'findAll'");
+    public List<Appointment> findAll() {
+        return appointmentRepository.findAll();
     }
 
     @Override
-    public Object findByUser(String name) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'findByUser'");
+    public List<Appointment> findByUser(String username) {
+        return appointmentRepository.findByUsername(username);
+    }
+
+    @Override
+    public List<Appointment> getAllAppointments() {
+        return appointmentRepository.findAll();
     }
 }

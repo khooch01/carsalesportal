@@ -1,37 +1,35 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
     <title>View Users</title>
-    <link rel="stylesheet" th:href="@{/css/view_users.css}">
+    <link rel="stylesheet" th:href="@{/admin.css}">
 </head>
 <body>
+    <div th:replace="admin/header :: header"></div>
     <div>
-        <h1>View Users</h1>
+        <h1>Registered Users</h1>
         <table>
             <thead>
                 <tr>
                     <th>Username</th>
-                    <th>Email</th>
-                    <th>Phone Number</th>
-                    <th>Roles</th>
+                    <th>Role</th>
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
                 <tr th:each="user : ${users}">
-                    <td th:text="${user.username}"></td>
-                    <td th:text="${user.email}"></td>
-                    <td th:text="${user.phoneNumber}"></td>
-                    <td th:text="${user.roles}"></td>
+                    <td th:text="${user.username}">Username</td>
+                    <td th:text="${user.roles[0].roleName}">Role</td>
                     <td>
-                        <form th:action="@{'/admin/users/makeAdmin/' + ${user.id}}" method="post">
-                            <button type="submit">Make Admin</button>
+                        <a th:href="@{'/admin/users/edit/' + ${user.id}}">Edit</a>
+                        <form th:action="@{'/admin/users/delete/' + ${user.id}}" method="post" style="display:inline;">
+                            <button type="submit">Delete</button>
                         </form>
                     </td>
                 </tr>
             </tbody>
         </table>
     </div>
+    <div th:replace="admin/footer :: footer"></div>
 </body>
 </html>

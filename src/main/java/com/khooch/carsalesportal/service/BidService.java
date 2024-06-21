@@ -2,8 +2,17 @@ package com.khooch.carsalesportal.service;
 
 import com.khooch.carsalesportal.entity.Bid;
 
-public interface BidService {
-    void postBid(Bid bid, String username);
+import java.util.List;
 
-    Object findByUser(String name);
+public interface BidService {
+
+    Bid postBid(Bid bid, String username);
+
+    List<Bid> findByUser(String username);
+
+    List<Bid> findAll();
+
+    void deleteBid(Long id);
+
+    List<Bid> getAllBids();
 }

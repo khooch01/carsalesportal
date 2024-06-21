@@ -1,14 +1,9 @@
 package com.khooch.carsalesportal.dto;
 
-import jakarta.validation.constraints.NotBlank;
-
 public class UserRegistrationDto {
-
-    @NotBlank(message = "Username is required")
     private String username;
-
-    @NotBlank(message = "Password is required")
     private String password;
+    private String role;
 
     // Getters and setters
     public String getUsername() {
@@ -27,13 +22,11 @@ public class UserRegistrationDto {
         this.password = password;
     }
 
-    public String getPhoneNumber() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getPhoneNumber'");
+    public String getRole() {
+        return role;
     }
 
-    public String getEmail() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getEmail'");
+    public void setRole(String role) {
+        this.role = role;
     }
 }

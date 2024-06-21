@@ -2,6 +2,7 @@ package com.khooch.carsalesportal.service.impl;
 
 import com.khooch.carsalesportal.service.StorageService;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -17,8 +18,9 @@ public class StorageServiceImpl implements StorageService {
 
     @Override
     public String store(MultipartFile file) throws IOException {
-        String filename = UUID.randomUUID().toString() + "-" + file.getOriginalFilename();
-        Files.copy(file.getInputStream(), this.rootLocation.resolve(filename));
-        return filename;
+        String filename = StringUtils.cleanPath(file.getOriginalFilename());
+        String uniqueFilename = UUID.randomUUID().toString() + "-" + filename;
+        Files.copy(file.getInputStream(), this.rootLocation.resolve(uniqueFilename));
+        return uniqueFilename;
     }
 }

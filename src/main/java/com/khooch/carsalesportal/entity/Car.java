@@ -27,16 +27,8 @@ public class Car {
     private String imagePath;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id")
     private User user;
-
-    private boolean isActive = true;
-
-    private boolean isSold = false;
-
-    @ManyToOne
-    @JoinColumn(name = "buyer_id")
-    private User buyer;
 
     // Getters and setters
     public Long getId() {
@@ -101,29 +93,5 @@ public class Car {
 
     public void setUser(User user) {
         this.user = user;
-    }
-
-    public boolean isActive() {
-        return isActive;
-    }
-
-    public void setActive(boolean active) {
-        isActive = active;
-    }
-
-    public boolean isSold() {
-        return isSold;
-    }
-
-    public void setSold(boolean sold) {
-        isSold = sold;
-    }
-
-    public User getBuyer() {
-        return buyer;
-    }
-
-    public void setBuyer(User buyer) {
-        this.buyer = buyer;
     }
 }

@@ -1,10 +1,11 @@
 package com.khooch.carsalesportal.service.impl;
 
 import com.khooch.carsalesportal.entity.Car;
+import com.khooch.carsalesportal.entity.User;
 import com.khooch.carsalesportal.repository.CarRepository;
+import com.khooch.carsalesportal.repository.UserRepository;
 import com.khooch.carsalesportal.service.CarService;
 import com.khooch.carsalesportal.service.StorageService;
-import com.khooch.carsalesportal.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,33 +20,24 @@ public class CarServiceImpl implements CarService {
     private CarRepository carRepository;
 
     @Autowired
-    private StorageService storageService;
+    private UserRepository userRepository;
 
     @Autowired
-    private UserService userService;
+    private StorageService storageService;
 
     @Override
-    public void saveCar(Car car, MultipartFile imageFile, String username) throws IOException {
-        String imagePath = storageService.store(imageFile);
-        car.setImagePath(imagePath);
-        car.setUser(userService.findByUsername(username));
-        carRepository.save(car);
-    }
+    public Car saveCar(Car car, MultipartFile imageFile, String username) {
+        try {
+            String imagePath = storageService.store(imageFile);
+            car.setImagePath(imagePath);
 
-    @Override
-    public void deactivateCar(Long id, String username) {
-        Car car = carRepository.findByIdAndUserUsername(id, username);
-        if (car != null) {
-            car.setActive(false);
-            carRepository.save(car);
+            User user = userRepository.findByUsername(username);
+            car.setUser(user);
+
+            return carRepository.save(car);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to store file " + e.getMessage());
         }
-    }
-
-    @Override
-    public void activateCar(Long id) {
-        Car car = carRepository.findById(id).orElseThrow(() -> new RuntimeException("Car not found"));
-        car.setActive(true);
-        carRepository.save(car);
     }
 
     @Override
@@ -54,7 +46,12 @@ public class CarServiceImpl implements CarService {
     }
 
     @Override
-    public List<Car> getCarsByUser(String username) {
-        return carRepository.findByUserUsername(username);
+    public Car getCarById(Long id) {
+        return carRepository.findById(id).orElse(null);
+    }
+
+    @Override
+    public void deleteCar(Long id) {
+        carRepository.deleteById(id);
     }
 }

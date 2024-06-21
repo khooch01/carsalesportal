@@ -2,12 +2,12 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Add Car</title>
-    <link rel="stylesheet" th:href="@{/add_car.css}">
+    <title>Edit Car</title>
+    <link rel="stylesheet" th:href="@{/edit_car.css}">
 </head>
 <body>
-    <h1>Add Car</h1>
-    <form th:action="@{/user/cars/add}" method="post" enctype="multipart/form-data">
+    <h1>Edit Car</h1>
+    <form th:action="@{/user/cars/edit/{id}(id=${car.id})}" method="post" enctype="multipart/form-data">
         <div>
             <label for="make">Make:</label>
             <input type="text" id="make" name="make" th:field="*{make}" required>
@@ -30,10 +30,10 @@
         </div>
         <div>
             <label for="imageFile">Car Image:</label>
-            <input type="file" id="imageFile" name="imageFile" required>
+            <input type="file" id="imageFile" name="imageFile">
         </div>
         <div>
-            <button type="submit">Add Car</button>
+            <button type="submit">Update Car</button>
         </div>
     </form>
 </body>

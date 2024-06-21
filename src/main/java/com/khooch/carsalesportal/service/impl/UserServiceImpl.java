@@ -6,7 +6,9 @@ import com.khooch.carsalesportal.entity.User;
 import com.khooch.carsalesportal.repository.RoleRepository;
 import com.khooch.carsalesportal.repository.UserRepository;
 import com.khooch.carsalesportal.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.annotation.PostConstruct;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -14,29 +16,61 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private RoleRepository roleRepository;
+    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    @PostConstruct
+    public void init() {
+        createRoleIfNotFound("ROLE_ADMIN");
+        createRoleIfNotFound("ROLE_USER");
+
+        if (userRepository.findByUsername("admin") == null) {
+            User admin = new User();
+            admin.setUsername("admin");
+            admin.setPassword(passwordEncoder.encode("admin123"));
+            admin.setRoles(Collections.singletonList(roleRepository.findByRoleName("ROLE_ADMIN").orElseThrow()));
+            admin.setEnabled(true);
+            userRepository.save(admin);
+        }
+
+        if (userRepository.findByUsername("user") == null) {
+            User user = new User();
+            user.setUsername("user");
+            user.setPassword(passwordEncoder.encode("user123"));
+            user.setRoles(Collections.singletonList(roleRepository.findByRoleName("ROLE_USER").orElseThrow()));
+            user.setEnabled(true);
+            userRepository.save(user);
+        }
+    }
+
+    private void createRoleIfNotFound(String roleName) {
+        if (roleRepository.findByRoleName(roleName).isEmpty()) {
+            Role role = new Role();
+            role.setRoleName(roleName);
+            roleRepository.save(role);
+        }
+    }
 
     @Override
     public User save(UserRegistrationDto registrationDto) {
         User user = new User();
         user.setUsername(registrationDto.getUsername());
         user.setPassword(passwordEncoder.encode(registrationDto.getPassword()));
-        user.setEmail(registrationDto.getEmail());
-        user.setPhoneNumber(registrationDto.getPhoneNumber());
+        user.setRoles(Collections.singletonList(roleRepository.findByRoleName(registrationDto.getRole()).orElseThrow()));
         user.setEnabled(true);
-        Role userRole = roleRepository.findByRoleName("ROLE_USER");
-        user.setRoles(Collections.singletonList(userRole));
         return userRepository.save(user);
     }
 
@@ -46,35 +80,33 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void updateUser(User user, String username) {
-        User existingUser = userRepository.findByUsername(username);
-        existingUser.setEmail(user.getEmail());
-        existingUser.setPhoneNumber(user.getPhoneNumber());
-        userRepository.save(existingUser);
-    }
-
-    @Override
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
-    }
-
-    @Override
-    public void makeAdmin(Long id) {
-        User user = userRepository.findById(id).orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        Role adminRole = roleRepository.findByRoleName("ROLE_ADMIN");
-        user.getRoles().add(adminRole);
-        userRepository.save(user);
-    }
-
-    @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = findByUsername(username);
         if (user == null) {
             throw new UsernameNotFoundException("Invalid username or password.");
         }
+
+        Set<GrantedAuthority> authorities = user.getRoles().stream()
+                .map(role -> new SimpleGrantedAuthority(role.getRoleName()))
+                .collect(Collectors.toSet());
+
         return org.springframework.security.core.userdetails.User.withUsername(user.getUsername())
                 .password(user.getPassword())
-                .authorities(user.getRoles().stream().map(role -> role.getRoleName()).toArray(String[]::new))
+                .authorities(authorities)
+                .accountExpired(false)
+                .accountLocked(false)
+                .credentialsExpired(false)
+                .disabled(!user.isEnabled())
                 .build();
+    }
+
+    @Override
+    public void deleteById(Long id) {
+        userRepository.deleteById(id);
+    }
+
+    @Override
+    public List<User> findAll() {
+        return userRepository.findAll();
     }
 }

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body>
+    <div th:replace="header :: header"></div>
+    <main>
+        <h1>Admin Dashboard</h1>
+        <section>
+            <h2>Manage Users</h2>
+            <ul>
+                <li><a th:href="@{/admin/users}">View Users</a></li>
+                <li><a th:href="@{/admin/approveAppointments}">Approve/Deny Appointments</a></li>
+                <li><a th:href="@{/admin/bids}">Manage Bids</a></li>
+            </ul>
+        </section>
+        <section>
+            <h2>Manage Cars</h2>
+            <ul>
+                <li><a th:href="@{/admin/cars}">View Cars</a></li>
+                <li><a th:href="@{/admin/cars/add}">Add Car</a></li>
+            </ul>
+        </section>
+    </main>
+    <div th:replace="footer :: footer"></div>
+</body>
+</html>
