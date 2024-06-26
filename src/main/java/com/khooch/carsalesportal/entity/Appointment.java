@@ -1,23 +1,29 @@
 package com.khooch.carsalesportal.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import java.time.LocalDateTime;
+import java.util.Date;
 
 @Entity
-@Table(name = "appointments")
 public class Appointment {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Username is required")
-    private String username;
-
-    private LocalDateTime appointmentDate;
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date appointmentDate;
 
     private boolean approved;
+    private String status;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    @ManyToOne
+    @JoinColumn(name = "car_id")
+    private Car car;
+
+    // Constructors, getters, and setters
 
     // Getters and Setters
     public Long getId() {
@@ -28,19 +34,11 @@ public class Appointment {
         this.id = id;
     }
 
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public LocalDateTime getAppointmentDate() {
+    public Date getAppointmentDate() {
         return appointmentDate;
     }
 
-    public void setAppointmentDate(LocalDateTime appointmentDate) {
+    public void setAppointmentDate(Date appointmentDate) {
         this.appointmentDate = appointmentDate;
     }
 
@@ -50,5 +48,29 @@ public class Appointment {
 
     public void setApproved(boolean approved) {
         this.approved = approved;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public Car getCar() {
+        return car;
+    }
+
+    public void setCar(Car car) {
+        this.car = car;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

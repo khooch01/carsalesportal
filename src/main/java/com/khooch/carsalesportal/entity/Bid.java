@@ -1,20 +1,29 @@
 package com.khooch.carsalesportal.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
+import java.math.BigDecimal;
 
 @Entity
-@Table(name = "bids")
 public class Bid {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Username is required")
-    private String username;
+    @Column(name = "bid_amount")
+    private BigDecimal bidAmount;
 
-    private double amount;
+    @ManyToOne
+    @JoinColumn(name = "car_id")
+    private Car car;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    @ManyToOne
+    @JoinColumn(name = "status_id")
+    private BidStatus status;
 
     // Getters and Setters
     public Long getId() {
@@ -25,19 +34,35 @@ public class Bid {
         this.id = id;
     }
 
-    public String getUsername() {
-        return username;
+    public BigDecimal getBidAmount() {
+        return bidAmount;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setBidAmount(BigDecimal bidAmount) {
+        this.bidAmount = bidAmount;
     }
 
-    public double getAmount() {
-        return amount;
+    public Car getCar() {
+        return car;
     }
 
-    public void setAmount(double amount) {
-        this.amount = amount;
+    public void setCar(Car car) {
+        this.car = car;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public BidStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(BidStatus status) {
+        this.status = status;
     }
 }

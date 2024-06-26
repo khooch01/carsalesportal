@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Manage Bids</title>
+    <link rel="stylesheet" th:href="@{/styles.css}">
+</head>
+<body>
+    <div th:replace="header :: header"></div>
+    
+    <div class="container">
+        <h1>Manage Bids</h1>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Bid ID</th>
+                    <th>User</th>
+                    <th>Car</th>
+                    <th>Bid Amount</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="bid : ${bids}">
+                    <td th:text="${bid.id}">Bid ID</td>
+                    <td th:text="${bid.user.username}">User</td>
+                    <td th:text="${bid.car.make + ' ' + bid.car.model}">Car</td>
+                    <td th:text="${bid.bidAmount}">Bid Amount</td>
+                    <td th:text="${bid.status.name}">Status</td>
+                    <td>
+                        <form th:action="@{/admin/bids/approve/{id}(id=${bid.id})}" method="post" style="display:inline;">
+                            <button type="submit">Approve</button>
+                        </form>
+                        <form th:action="@{/admin/bids/reject/{id}(id=${bid.id})}" method="post" style="display:inline;">
+                            <button type="submit">Reject</button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <div th:replace="footer :: footer"></div>
+</body>
+</html>

@@ -1,9 +1,10 @@
 package com.khooch.carsalesportal.dto;
 
 public class UserRegistrationDto {
-    private String username;
+    private String username; // Changed from email to username
     private String password;
-    private String role;
+    private String firstName;
+    private String lastName;
 
     // Getters and setters
     public String getUsername() {
@@ -14,6 +15,7 @@ public class UserRegistrationDto {
         this.username = username;
     }
 
+    // Password, firstName, lastName getters and setters remain the same
     public String getPassword() {
         return password;
     }
@@ -22,11 +24,19 @@ public class UserRegistrationDto {
         this.password = password;
     }
 
-    public String getRole() {
-        return role;
+    public String getFirstName() {
+        return firstName;
     }
 
-    public void setRole(String role) {
-        this.role = role;
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 }

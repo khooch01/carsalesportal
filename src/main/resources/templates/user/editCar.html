@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Car</title>
+    <link rel="stylesheet" th:href="@{/styles.css}">
+</head>
+<body>
+    <div th:replace="header :: header"></div>
+    
+    <div class="container">
+        <h1>Edit Car</h1>
+        <form th:action="@{/user/cars/update}" th:object="${carDto}" method="post" enctype="multipart/form-data">
+            <input type="hidden" th:field="*{id}" />
+            <div>
+                <label for="make">Make:</label>
+                <input type="text" id="make" th:field="*{make}" />
+            </div>
+            <div>
+                <label for="model">Model:</label>
+                <input type="text" id="model" th:field="*{model}" />
+            </div>
+            <div>
+                <label for="year">Year:</label>
+                <input type="number" id="year" th:field="*{year}" />
+            </div>
+            <div>
+                <label for="price">Price:</label>
+                <input type="number" id="price" th:field="*{price}" />
+            </div>
+            <div>
+                <label for="mileage">Mileage:</label>
+                <input type="number" id="mileage" th:field="*{mileage}" />
+            </div>
+            <div>
+                <label for="color">Color:</label>
+                <input type="text" id="color" th:field="*{color}" />
+            </div>
+            <div>
+                <label for="description">Description:</label>
+                <textarea id="description" th:field="*{description}"></textarea>
+            </div>
+            <div>
+                <label for="imageFile">Upload Image:</label>
+                <input type="file" id="imageFile" name="imageFile" />
+            </div>
+            <div>
+                <button type="submit">Update Car</button>
+            </div>
+        </form>
+    </div>
+    
+    <div th:replace="footer :: footer"></div>
+</body>
+</html>

@@ -3,31 +3,31 @@ package com.khooch.carsalesportal.entity;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "roles")
-public class Role {
+public class BidStatus {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long statusId;
 
     @Column(nullable = false, unique = true)
     private String name;
 
-    public Role() {
-        // No-argument constructor for JPA
+    // Constructors, getters, and setters
+
+    public BidStatus() {
+        // Default constructor
     }
 
-    public Role(String name) {
+    public BidStatus(String name) {
         this.name = name;
     }
 
-    // Getter and setter methods
-    public Long getId() {
-        return id;
+    public Long getStatusId() {
+        return statusId;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setStatusId(Long statusId) {
+        this.statusId = statusId;
     }
 
     public String getName() {
@@ -37,5 +37,4 @@ public class Role {
     public void setName(String name) {
         this.name = name;
     }
-    
 }

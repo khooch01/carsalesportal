@@ -1,43 +1,105 @@
 package com.khooch.carsalesportal.service.impl;
 
+import com.khooch.carsalesportal.dto.CarDto;
+import com.khooch.carsalesportal.entity.Appointment;
+import com.khooch.carsalesportal.entity.Bid;
 import com.khooch.carsalesportal.entity.Car;
 import com.khooch.carsalesportal.entity.User;
+import com.khooch.carsalesportal.repository.AppointmentRepository;
 import com.khooch.carsalesportal.repository.CarRepository;
-import com.khooch.carsalesportal.repository.UserRepository;
 import com.khooch.carsalesportal.service.CarService;
-import com.khooch.carsalesportal.service.StorageService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class CarServiceImpl implements CarService {
 
-    @Autowired
-    private CarRepository carRepository;
+    private final CarRepository carRepository;
+    private final AppointmentRepository appointmentRepository; // Inject AppointmentRepository
 
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private StorageService storageService;
+    // Constructor injection of repositories
+    public CarServiceImpl(CarRepository carRepository, AppointmentRepository appointmentRepository) {
+        this.carRepository = carRepository;
+        this.appointmentRepository = appointmentRepository;
+    }
 
     @Override
-    public Car saveCar(Car car, MultipartFile imageFile, String username) {
+    public Car save(Car car) {
+        return carRepository.save(car);
+    }
+
+    @Override
+    public Car save(CarDto carDto, MultipartFile imageFile) {
+        // Convert MultipartFile to byte array
+        byte[] imageData;
         try {
-            String imagePath = storageService.store(imageFile);
-            car.setImagePath(imagePath);
-
-            User user = userRepository.findByUsername(username);
-            car.setUser(user);
-
-            return carRepository.save(car);
+            imageData = imageFile.getBytes();
         } catch (IOException e) {
-            throw new RuntimeException("Failed to store file " + e.getMessage());
+            throw new RuntimeException("Failed to read image file", e);
         }
+
+        // Create and save the car entity
+        Car car = new Car();
+        car.setMake(carDto.getMake());
+        car.setModel(carDto.getModel());
+        car.setYear(carDto.getYear());
+        car.setPrice(carDto.getPrice());
+        car.setMileage(carDto.getMileage());
+        car.setColor(carDto.getColor());
+        car.setDescription(carDto.getDescription());
+        car.setImageData(imageData); // Set image data
+        car.setUser(carDto.getUser());
+        car.setActive(true); // Assuming new cars are active by default
+
+        return carRepository.save(car);
+    }
+
+    @Override
+    public List<Car> findAll() {
+        return carRepository.findAll();
+    }
+
+    @Override
+    public Optional<Car> findById(Long id) {
+        return carRepository.findById(id);  // Change here
+    }
+
+    @Override
+    public void delete(Long id) {
+        carRepository.deleteById(id);
+    }
+
+    @Override
+    public List<Car> search(String make, String model, Integer year, Integer price, Integer mileage) {
+        // Implement your search logic here
+        return null;
+    }
+    @Override
+    public void deactivate(Long id) {
+        // Implement deactivate logic here, e.g., setting active flag to false
+        Optional<Car> optionalCar = carRepository.findById(id);
+        optionalCar.ifPresent(car -> {
+            car.setActive(false);
+            carRepository.save(car);
+        });
+    }
+
+    @Override
+    public Car update(Car car) {
+        return carRepository.save(car);
+    }
+
+    @Override
+    public List<Car> findByUserName(String username) {
+        return carRepository.findByUserUsername(username);
     }
 
     @Override
@@ -46,12 +108,89 @@ public class CarServiceImpl implements CarService {
     }
 
     @Override
-    public Car getCarById(Long id) {
-        return carRepository.findById(id).orElse(null);
+    public void addCar(Car car) {
+        carRepository.save(car);
     }
 
     @Override
-    public void deleteCar(Long id) {
-        carRepository.deleteById(id);
+    public Car getCarById(Long carId) {
+        Optional<Car> optionalCar = carRepository.findById(carId);
+        if (optionalCar.isPresent()) {
+            return optionalCar.get();
+        } else {
+            throw new IllegalArgumentException("Car with id " + carId + " not found");
+        }
     }
+
+    @Override
+    public void updateCar(Car car) {
+        carRepository.save(car);
+    }
+
+    @Override
+    public void deleteCar(Long carId) {
+        carRepository.deleteById(carId);
+    }
+    @Override
+    public List<Car> findByUser(User user) {
+        return carRepository.findByUser(user);
+    }
+
+    @Override
+    public void saveOrUpdateCar(Car car) {
+        carRepository.save(car);
+    }
+
+    @Override
+    public void deactivateCar(Long carId) {
+        Car car = carRepository.findById(carId).orElse(null);
+        if (car != null) {
+            car.setActive(false);
+            carRepository.save(car);
+        }
+        // Handle if car with given ID is not found
+    }
+    @Override
+    public void bookAppointment(Appointment appointment) {
+        appointmentRepository.save(appointment);
+        // You can add more logic here as needed
+    }
+
+    @Override
+    public void postBid(Bid bid) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'postBid'");
+    }
+
+    @Override
+    public void saveCar(CarDto carDto, byte[] imageData, User user) {
+        Car car = new Car();
+        car.setMake(carDto.getMake());
+        car.setModel(carDto.getModel());
+        car.setYear(carDto.getYear());
+        car.setPrice(carDto.getPrice());
+        car.setMileage(carDto.getMileage());
+        car.setColor(carDto.getColor());
+        car.setDescription(carDto.getDescription());
+        car.setImageData(imageData);
+        car.setActive(true);
+        car.setUser(user);
+        carRepository.save(car);
+    }
+    @Override
+    public List<Car> findAllAvailableCars() {
+        return carRepository.findAllByActiveTrue(); // Adjust this based on your repository method
+    }
+
+    @Override
+    public double calculateHighestPrice(List<Car> cars) {
+        double highestPrice = 0.0;
+        for (Car car : cars) {
+            if (car.getPrice() > highestPrice) {
+                highestPrice = car.getPrice();
+            }
+        }
+        return highestPrice;
+    }
+    
 }

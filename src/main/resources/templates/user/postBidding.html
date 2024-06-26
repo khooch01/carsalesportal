@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Post Bidding</title>
+</head>
+<body>
+    <h1>Post a Bid</h1>
+
+    <form th:action="@{/user/bidding/post}" th:object="${bidDto}" method="post">
+        <div>
+            <label for="car">Car:</label>
+            <select id="car" th:field="*{carId}">
+                <option th:each="car : ${availableCars}" th:value="${car.id}" th:text="${car.make + ' ' + car.model}"></option>
+            </select>
+        </div>
+        <div>
+            <label for="amount">Bid Amount:</label>
+            <input type="number" id="amount" th:field="*{amount}" required/>
+        </div>
+        <div>
+            <button type="submit">Submit Bid</button>
+        </div>
+    </form>
+
+    <div th:if="${successMessage}">
+        <p th:text="${successMessage}"></p>
+    </div>
+    <div th:if="${errorMessage}">
+        <p th:text="${errorMessage}"></p>
+    </div>
+</body>
+</html>

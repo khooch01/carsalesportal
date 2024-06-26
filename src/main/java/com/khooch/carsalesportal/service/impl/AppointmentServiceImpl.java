@@ -1,40 +1,50 @@
 package com.khooch.carsalesportal.service.impl;
 
+import com.khooch.carsalesportal.dto.AppointmentDto;
 import com.khooch.carsalesportal.entity.Appointment;
+import com.khooch.carsalesportal.entity.Car;
+import com.khooch.carsalesportal.entity.User;
 import com.khooch.carsalesportal.repository.AppointmentRepository;
+import com.khooch.carsalesportal.repository.CarRepository;
+import com.khooch.carsalesportal.repository.UserRepository;
 import com.khooch.carsalesportal.service.AppointmentService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class AppointmentServiceImpl implements AppointmentService {
 
     private final AppointmentRepository appointmentRepository;
+    private final UserRepository userRepository;
+    private final CarRepository carRepository;
 
-    @Autowired
-    public AppointmentServiceImpl(AppointmentRepository appointmentRepository) {
+    public AppointmentServiceImpl(AppointmentRepository appointmentRepository, UserRepository userRepository, CarRepository carRepository) {
         this.appointmentRepository = appointmentRepository;
+        this.userRepository = userRepository;
+        this.carRepository = carRepository;
     }
 
     @Override
-    public Appointment bookAppointment(Appointment appointment, String username) {
-        appointment.setUsername(username);
+    public Appointment save(AppointmentDto appointmentDto) {
+        Appointment appointment = new Appointment();
+        appointment.setAppointmentDate(appointmentDto.getAppointmentDate());
+        Car car = carRepository.findById(appointmentDto.getCarId()).orElseThrow(() -> new RuntimeException("Car not found"));
+        appointment.setCar(car);
+        User user = userRepository.findById(1L).orElseThrow(() -> new RuntimeException("User not found")); // Placeholder user ID, replace with actual logic
+        appointment.setUser(user);
+        appointment.setApproved(false); // Default to not approved
         return appointmentRepository.save(appointment);
     }
 
     @Override
-    public void approveAppointment(Long id) {
-        Appointment appointment = appointmentRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid appointment Id:" + id));
-        appointment.setApproved(true);
-        appointmentRepository.save(appointment);
-    }
-
-    @Override
-    public void denyAppointment(Long id) {
-        appointmentRepository.deleteById(id);
+    public Appointment findById(Long id) {
+        return appointmentRepository.findById(id).orElse(null);
     }
 
     @Override
@@ -43,12 +53,68 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
-    public List<Appointment> findByUser(String username) {
-        return appointmentRepository.findByUsername(username);
+    public void deleteById(Long id) {
+        appointmentRepository.deleteById(id);
     }
 
     @Override
     public List<Appointment> getAllAppointments() {
         return appointmentRepository.findAll();
+    }
+
+    @Override
+    public void approveAppointment(Long appointmentId) {
+        Optional<Appointment> optionalAppointment = appointmentRepository.findById(appointmentId);
+        if (optionalAppointment.isPresent()) {
+            Appointment appointment = optionalAppointment.get();
+            // Implement approval logic (for example, update appointment status)
+            appointment.setStatus("Approved");
+            appointmentRepository.save(appointment);
+        } else {
+            throw new IllegalArgumentException("Appointment with id " + appointmentId + " not found");
+        }
+    }
+
+    @Override
+    public void denyAppointment(Long appointmentId) {
+        Optional<Appointment> optionalAppointment = appointmentRepository.findById(appointmentId);
+        if (optionalAppointment.isPresent()) {
+            Appointment appointment = optionalAppointment.get();
+            // Implement denial logic (for example, update appointment status)
+            appointment.setStatus("Denied");
+            appointmentRepository.save(appointment);
+        } else {
+            throw new IllegalArgumentException("Appointment with id " + appointmentId + " not found");
+        }
+    }
+    @Override
+    public void bookAppointment(User user, Long carId, String date, String time) {
+        Car car = carRepository.findById(carId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid car Id:" + carId));
+
+        // Parse date and time strings into LocalDateTime
+        LocalDateTime appointmentDateTime = parseDateTime(date, time);
+
+        Appointment appointment = new Appointment();
+        appointment.setUser(user);
+        appointment.setCar(car);
+
+        // Convert LocalDateTime to Date
+        Date appointmentDate = Date.from(appointmentDateTime.atZone(ZoneId.systemDefault()).toInstant());
+        appointment.setAppointmentDate(appointmentDate);
+
+        appointmentRepository.save(appointment);
+    }
+
+    // Method to parse date and time strings into LocalDateTime
+    private LocalDateTime parseDateTime(String date, String time) {
+        // Format date and time strings
+        String dateTimeString = date + " " + time;
+
+        // Define the date-time format (adjust according to your input format)
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+
+        // Parse string to LocalDateTime
+        return LocalDateTime.parse(dateTimeString, formatter);
     }
 }

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>User Homepage</title>
+    <link rel="stylesheet" th:href="@{/styles.css}">
+</head>
+<body>
+    <div th:replace="header :: header"></div>
+    
+    <div class="container">
+        <h1>Welcome, <span th:text="${#authentication.principal.username}"></span>!</h1>
+        
+        <div class="actions">
+            <h2>Actions</h2>
+            <ul>
+                <li><a th:href="@{/user/cars/post}">Post a Car for Sale</a></li>
+                <li><a th:href="@{/user/profile/update}">Update Profile</a></li>
+                <li><a th:href="@{/user/appointments/book}">Book Appointment for Test Drive</a></li>
+                <li><a th:href="@{/user/bidding/post}">Post Bidding Price</a></li>
+                <!-- Add more actions as needed -->
+            </ul>
+        </div>
+        
+        <div class="car-listings">
+            <h2>Your Active Car Listings</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Make</th>
+                        <th>Model</th>
+                        <th>Year</th>
+                        <th>Price</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="car : ${userCars}">
+                        <td th:text="${car.make}">Make</td>
+                        <td th:text="${car.model}">Model</td>
+                        <td th:text="${car.year}">Year</td>
+                        <td th:text="${car.price}">Price</td>
+                        <td th:text="${car.active ? 'Active' : 'Inactive'}">Status</td>
+                        <td>
+                            <a th:href="@{/user/cars/edit/{id}(id=${car.id})}">Edit</a>
+                            <form th:action="@{/user/cars/deactivate/{id}(id=${car.id})}" method="post" style="display:inline;">
+                                <button type="submit">Deactivate</button>
+                            </form>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="approved-appointments">
+            <h2>Your Approved Appointments</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Appointment Date</th>
+                        <th>Car Make</th>
+                        <th>Car Model</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="appointment : ${approvedAppointments}">
+                        <td th:text="${#dates.format(appointment.appointmentDate, 'dd-MM-yyyy HH:mm')}">Appointment Date</td>
+                        <td th:text="${appointment.car.make}">Car Make</td>
+                        <td th:text="${appointment.car.model}">Car Model</td>
+                        <td>
+                            <!-- Add actions related to appointments -->
+                            <!-- Example: Cancel appointment -->
+                            <form th:action="@{/user/appointments/cancel/{id}(id=${appointment.id})}" method="post" style="display:inline;">
+                                <button type="submit">Cancel Appointment</button>
+                            </form>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+    </div>
+    
+    <div th:replace="footer :: footer"></div>
+</body>
+</html>

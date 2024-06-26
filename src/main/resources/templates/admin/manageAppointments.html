@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - Manage Appointments</title>
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body>
+    <div th:replace="header :: header"></div>
+    <main>
+        <h1>Manage Appointments</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>User</th>
+                    <th>Car</th>
+                    <th>Appointment Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="appointment : ${appointments}">
+                    <td th:text="${appointment.id}"></td>
+                    <td th:text="${appointment.user.username}"></td>
+                    <td th:text="${appointment.car.make} + ' ' + ${appointment.car.model}"></td>
+                    <td th:text="${#dates.format(appointment.appointmentDate, 'yyyy-MM-dd HH:mm')}"></td>
+                    <td th:text="${appointment.status}"></td>
+                    <td>
+                        <a th:href="@{'/admin/appointments/approve/' + ${appointment.id}}">Approve</a>
+                        <a th:href="@{'/admin/appointments/deny/' + ${appointment.id}}">Deny</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </main>
+    <div th:replace="footer :: footer"></div>
+</body>
+</html>

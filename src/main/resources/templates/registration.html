@@ -2,28 +2,28 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Register</title>
-    <link rel="stylesheet" th:href="@{/register.css}">
+    <title>Registration</title>
 </head>
 <body>
-    <div>
-        <h1>Register</h1>
-        <form th:action="@{/registration}" method="post">
-            <div>
-                <label for="username">Username:</label>
-                <input type="text" id="username" name="username" required>
-            </div>
-            <div>
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password" required>
-            </div>
-            <div>
-                <button type="submit">Register</button>
-            </div>
-        </form>
-        <div th:if="${param.success}">
-            <p style="color: green;">Registration successful!</p>
+    <h1>Register</h1>
+    <form th:action="@{/register}" th:object="${user}" method="post">
+        <div>
+            <label for="firstName">First Name</label>
+            <input type="text" id="firstName" th:field="*{firstName}" required />
         </div>
-    </div>
+        <div>
+            <label for="lastName">Last Name</label>
+            <input type="text" id="lastName" th:field="*{lastName}" required />
+        </div>
+        <div>
+            <label for="username">Username</label>
+            <input type="text" id="username" th:field="*{username}" required />
+        </div>
+        <div>
+            <label for="password">Password</label>
+            <input type="password" id="password" th:field="*{password}" required />
+        </div>
+        <button type="submit">Register</button>
+    </form>
 </body>
 </html>

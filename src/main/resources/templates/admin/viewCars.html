@@ -5,7 +5,7 @@
     <link rel="stylesheet" th:href="@{/admin.css}">
 </head>
 <body>
-    <div th:replace="admin/header :: header"></div>
+    <div th:replace="header :: header"></div>
     <div>
         <h1>Car Listings</h1>
         <table>
@@ -13,8 +13,12 @@
                 <tr>
                     <th>Make</th>
                     <th>Model</th>
-                    <th>Registration Year</th>
+                    <th>Year</th>
                     <th>Price</th>
+                    <th>Mileage</th>
+                    <th>Color</th>
+                    <th>Description</th>
+                    <th>Active</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -22,8 +26,12 @@
                 <tr th:each="car : ${cars}">
                     <td th:text="${car.make}">Make</td>
                     <td th:text="${car.model}">Model</td>
-                    <td th:text="${car.registrationYear}">Year</td>
+                    <td th:text="${car.year}">Year</td>
                     <td th:text="${car.price}">Price</td>
+                    <td th:text="${car.mileage}">Mileage</td>
+                    <td th:text="${car.color}">Color</td>
+                    <td th:text="${car.description}">Description</td>
+                    <td th:text="${car.active ? 'Yes' : 'No'}">Active</td>
                     <td>
                         <a th:href="@{'/admin/cars/edit/' + ${car.id}}">Edit</a>
                         <form th:action="@{'/admin/cars/delete/' + ${car.id}}" method="post" style="display:inline;">
@@ -34,6 +42,6 @@
             </tbody>
         </table>
     </div>
-    <div th:replace="admin/footer :: footer"></div>
+    <div th:replace="footer :: footer"></div>
 </body>
 </html>
