@@ -3,9 +3,12 @@ package com.khooch.carsalesportal.service.impl;
 import com.khooch.carsalesportal.dto.CarDto;
 import com.khooch.carsalesportal.entity.Appointment;
 import com.khooch.carsalesportal.entity.Bid;
+import com.khooch.carsalesportal.entity.BidStatus;
 import com.khooch.carsalesportal.entity.Car;
 import com.khooch.carsalesportal.entity.User;
 import com.khooch.carsalesportal.repository.AppointmentRepository;
+import com.khooch.carsalesportal.repository.BidRepository;
+import com.khooch.carsalesportal.repository.BidStatusRepository;
 import com.khooch.carsalesportal.repository.CarRepository;
 import com.khooch.carsalesportal.service.CarService;
 import org.springframework.stereotype.Service;
@@ -24,11 +27,15 @@ public class CarServiceImpl implements CarService {
 
     private final CarRepository carRepository;
     private final AppointmentRepository appointmentRepository; // Inject AppointmentRepository
+    private final BidRepository bidRepository;
+    private final BidStatusRepository bidStatusRepository;
 
     // Constructor injection of repositories
-    public CarServiceImpl(CarRepository carRepository, AppointmentRepository appointmentRepository) {
+    public CarServiceImpl(CarRepository carRepository, AppointmentRepository appointmentRepository, BidRepository bidRepository, BidStatusRepository bidStatusRepository) {
         this.carRepository = carRepository;
         this.appointmentRepository = appointmentRepository;
+        this.bidRepository = bidRepository;
+        this.bidStatusRepository = bidStatusRepository;
     }
 
     @Override
@@ -193,4 +200,24 @@ public class CarServiceImpl implements CarService {
         return highestPrice;
     }
     
+    @Override
+    public List<Car> findCarsWithApprovedBidsByUser(User user) {
+        // Fetch the "APPROVED" bid status from the repository
+        Optional<BidStatus> approvedStatus = bidStatusRepository.findByName("APPROVED");
+
+        if (approvedStatus.isPresent()) {
+            // Fetch all bids for the user with the "APPROVED" status
+            List<Bid> userApprovedBids = bidRepository.findByUserAndStatus(user, approvedStatus.get());
+
+            // Extract cars from the approved bids
+            List<Car> carsWithApprovedBids = userApprovedBids.stream()
+                    .map(Bid::getCar)
+                    .collect(Collectors.toList());
+
+            return carsWithApprovedBids;
+        } else {
+            // Handle case where "APPROVED" status is not found
+            throw new IllegalStateException("Bid status 'APPROVED' not found");
+        }
+    }
 }

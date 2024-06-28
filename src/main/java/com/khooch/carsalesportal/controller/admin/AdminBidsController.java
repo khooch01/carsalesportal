@@ -60,7 +60,7 @@ public class AdminBidsController {
     @PostMapping("/admin/bids/reject/{id}")
     public String rejectBid(@PathVariable Long id) {
         bidService.rejectBid(id);
-        return "redirect:/admin/bids/";
+        return "redirect:/admin/bids";
     }
     @ExceptionHandler(InvalidDataAccessApiUsageException.class)
     public String handleInvalidDataAccessApiUsageException(InvalidDataAccessApiUsageException ex, RedirectAttributes redirectAttributes) {

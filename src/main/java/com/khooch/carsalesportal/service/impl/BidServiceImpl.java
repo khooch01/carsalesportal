@@ -159,4 +159,9 @@ public class BidServiceImpl implements BidService {
 
         bidRepository.save(bid);
     }
+
+    @Override
+    public List<Bid> findApprovedBidsByUser(User user) {
+        return bidRepository.findByUserAndStatusName(user, "Approved");
+    }
 }

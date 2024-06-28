@@ -32,6 +32,7 @@
                         <th>Year</th>
                         <th>Price</th>
                         <th>Status</th>
+                        <th>Image</th> <!-- Added Image column header -->
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -43,6 +44,9 @@
                         <td th:text="${car.price}">Price</td>
                         <td th:text="${car.active ? 'Active' : 'Inactive'}">Status</td>
                         <td>
+                            <img th:src="${car.imageUrl}" style="max-width: 100px; max-height: 100px;" /> <!-- Display image -->
+                        </td>
+                        <td>
                             <a th:href="@{/user/cars/edit/{id}(id=${car.id})}">Edit</a>
                             <form th:action="@{/user/cars/deactivate/{id}(id=${car.id})}" method="post" style="display:inline;">
                                 <button type="submit">Deactivate</button>
@@ -53,29 +57,22 @@
             </table>
         </div>
         
+        
         <div class="approved-appointments">
             <h2>Your Approved Appointments</h2>
             <table>
                 <thead>
                     <tr>
+                        <th>Car</th>
                         <th>Appointment Date</th>
-                        <th>Car Make</th>
-                        <th>Car Model</th>
-                        <th>Actions</th>
+                        <th>Status</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr th:each="appointment : ${approvedAppointments}">
-                        <td th:text="${#dates.format(appointment.appointmentDate, 'dd-MM-yyyy HH:mm')}">Appointment Date</td>
-                        <td th:text="${appointment.car.make}">Car Make</td>
-                        <td th:text="${appointment.car.model}">Car Model</td>
-                        <td>
-                            <!-- Add actions related to appointments -->
-                            <!-- Example: Cancel appointment -->
-                            <form th:action="@{/user/appointments/cancel/{id}(id=${appointment.id})}" method="post" style="display:inline;">
-                                <button type="submit">Cancel Appointment</button>
-                            </form>
-                        </td>
+                        <td th:text="${appointment.car.make + ' ' + appointment.car.model}"></td>
+                        <td th:text="${#dates.format(appointment.appointmentDate, 'yyyy-MM-dd HH:mm')}"></td>
+                        <td th:text="${appointment.status}"></td>
                     </tr>
                 </tbody>
             </table>

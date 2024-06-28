@@ -15,4 +15,8 @@ public interface AppointmentService {
     void denyAppointment(Long appointmentId);
     List<Appointment> getAllAppointments();
     void bookAppointment(User user, Long carId, String date, String time);
+    List<String> getAvailableDates();
+    void saveAppointment(Long bidId, String appointmentDate);
+    List<Appointment> findApprovedByUser(User user);
+    boolean checkIfCarHasApprovedBid(User user, Long carId);
 }

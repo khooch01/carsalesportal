@@ -34,4 +34,5 @@ public interface CarService {
     void saveCar(CarDto carDto, byte[] imageData, User user);
     List<Car> findAllAvailableCars();
     double calculateHighestPrice(List<Car> cars);
+    List<Car> findCarsWithApprovedBidsByUser(User user);
 }

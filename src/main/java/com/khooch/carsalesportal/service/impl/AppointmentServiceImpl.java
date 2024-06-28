@@ -2,9 +2,11 @@ package com.khooch.carsalesportal.service.impl;
 
 import com.khooch.carsalesportal.dto.AppointmentDto;
 import com.khooch.carsalesportal.entity.Appointment;
+import com.khooch.carsalesportal.entity.Bid;
 import com.khooch.carsalesportal.entity.Car;
 import com.khooch.carsalesportal.entity.User;
 import com.khooch.carsalesportal.repository.AppointmentRepository;
+import com.khooch.carsalesportal.repository.BidRepository;
 import com.khooch.carsalesportal.repository.CarRepository;
 import com.khooch.carsalesportal.repository.UserRepository;
 import com.khooch.carsalesportal.service.AppointmentService;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -23,11 +26,13 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final AppointmentRepository appointmentRepository;
     private final UserRepository userRepository;
     private final CarRepository carRepository;
+    private final BidRepository bidRepository;
 
-    public AppointmentServiceImpl(AppointmentRepository appointmentRepository, UserRepository userRepository, CarRepository carRepository) {
+    public AppointmentServiceImpl(AppointmentRepository appointmentRepository, UserRepository userRepository, CarRepository carRepository, BidRepository bidRepository) {
         this.appointmentRepository = appointmentRepository;
         this.userRepository = userRepository;
         this.carRepository = carRepository;
+        this.bidRepository = bidRepository;
     }
 
     @Override
@@ -116,5 +121,32 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         // Parse string to LocalDateTime
         return LocalDateTime.parse(dateTimeString, formatter);
+    }
+
+    @Override
+    public List<String> getAvailableDates() {
+        // Example implementation
+        return Arrays.asList("2024-07-01", "2024-07-02", "2024-07-03");
+    }
+
+    @Override
+    public void saveAppointment(Long bidId, String appointmentDate) {
+        Bid bid = bidRepository.findById(bidId).orElseThrow(() -> new IllegalArgumentException("Bid not found"));
+        bid.setAppointmentDate(appointmentDate);
+        bidRepository.save(bid);
+    }
+
+    @Override
+    public List<Appointment> findApprovedByUser(User user) {
+        return appointmentRepository.findByUserAndStatus(user, "Approved");
+    }
+    
+    @Override
+    public boolean checkIfCarHasApprovedBid(User user, Long carId) {
+        // Retrieve bids for the specified car and user
+        Bid bid = bidRepository.findByUserAndCarId(user, carId);
+
+        // Check if there is an approved bid for the specified car
+        return bid != null && "Approved".equals(bid.getStatus().getName()); // Assuming BidStatus is accessible via bid.getStatus()
     }
 }

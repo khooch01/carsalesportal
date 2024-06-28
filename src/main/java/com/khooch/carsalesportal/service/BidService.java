@@ -3,6 +3,7 @@ package com.khooch.carsalesportal.service;
 import com.khooch.carsalesportal.dto.BidDto;
 import com.khooch.carsalesportal.entity.Bid;
 import com.khooch.carsalesportal.entity.BidStatus;
+import com.khooch.carsalesportal.entity.User;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -23,4 +24,5 @@ public interface BidService {
     void save(Bid bid);
     List<Bid> findBidsByCarIdAndUserId(Long id, Long id2);
     void rejectBid(Long id);
+    List<Bid> findApprovedBidsByUser(User user);
 }

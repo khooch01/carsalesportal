@@ -17,6 +17,7 @@ import com.khooch.carsalesportal.service.UserService;
 import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -26,13 +27,19 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 @Controller
 @RequestMapping("/user")
@@ -43,6 +50,7 @@ public class UserController {
     private final AppointmentService appointmentService;
     private final BidService bidService;
     private final BidStatusService bidStatusService;
+
 
     @Autowired
     public UserController(UserService userService, CarService carService, AppointmentService appointmentService, BidService bidService, BidStatusService bidStatusService) {
@@ -67,23 +75,20 @@ public class UserController {
     @PostMapping("/cars/post")
     public String postCar(@ModelAttribute("carDto") CarDto carDto,
                           @RequestParam("imageFile") MultipartFile imageFile,
-                          @AuthenticationPrincipal UserDetails userDetails) {
+                          @AuthenticationPrincipal UserDetails userDetails,
+                          RedirectAttributes redirectAttributes) {
         try {
             // Validate image file if required
             if (imageFile.isEmpty()) {
-                // Handle empty file
                 throw new IllegalArgumentException("Image file is required");
             }
     
-            // Convert MultipartFile to byte array (image data)
-            byte[] imageData = imageFile.getBytes();
-    
-            // Set image data in carDto
-            carDto.setImageData(imageData);
+            // Save the image to a static location
+            String imageUrl = saveImageToFileSystem(imageFile);
     
             // Retrieve the user details (assuming you have a userService to find user by username)
             User user = userService.findByUsername(userDetails.getUsername());
-            
+    
             // Create a new Car entity from carDto
             Car car = new Car();
             car.setMake(carDto.getMake());
@@ -94,24 +99,44 @@ public class UserController {
             car.setColor(carDto.getColor());
             car.setDescription(carDto.getDescription());
             car.setUser(user); // Set the user who posted the car
+            car.setImageUrl(imageUrl); // Set image URL
+            car.setActive(true);
     
-            // Set the image data in the Car entity (if using imageData in Car entity)
-            car.setImageData(imageData);
-    
-            // Alternatively, if using CarDto, you might save CarDto directly
-            // carService.save(carDto, imageData);
-    
-            // Save the Car entity (or CarDto) to the database
+            // Save the Car entity to the database
             carService.save(car);
     
             // Redirect to home page or success page
             return "redirect:/user/home";
         } catch (Exception e) {
             // Handle exceptions, log errors, etc.
-            e.printStackTrace(); // Example logging
+            redirectAttributes.addFlashAttribute("errorMessage", "Failed to post car: " + e.getMessage());
             return "redirect:/error"; // Redirect to an error page
         }
     }
+    
+    private String saveImageToFileSystem(MultipartFile imageFile) throws IOException {
+        // Generate a unique filename using UUID
+        String fileName = UUID.randomUUID().toString() + "_" + imageFile.getOriginalFilename();
+    
+        // Create the upload directory if it doesn't exist
+        Path uploadDirectory = Paths.get(uploadPath);
+        if (!Files.exists(uploadDirectory)) {
+            Files.createDirectories(uploadDirectory);
+        }
+    
+        // Save the file to the file system
+        Path filePath = uploadDirectory.resolve(fileName);
+        Files.copy(imageFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+    
+        // Generate the URL for accessing the image
+        String imageUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path("/image/")
+                .path(fileName)
+                .toUriString();
+    
+        return imageUrl;
+    }
+    
 
     @GetMapping("/profile/update")
     public String updateUserProfileForm(Model model, @AuthenticationPrincipal UserDetails userDetails) {
@@ -149,16 +174,30 @@ public class UserController {
     @GetMapping("/appointments/book")
     public String bookAppointmentForm(Model model, @AuthenticationPrincipal UserDetails userDetails) {
         User user = userService.findByUsername(userDetails.getUsername());
-        List<Car> userCars = carService.findByUser(user);
-        model.addAttribute("userCars", userCars);
-        return "user/bookAppointment";
+        
+        // Find cars with approved bids
+        List<Car> userCarsWithApprovedBids = carService.findCarsWithApprovedBidsByUser(user);
+        
+        model.addAttribute("userCars", userCarsWithApprovedBids);
+        return "user/selectAppointment";
     }
 
     @PostMapping("/appointments/book")
     public String bookAppointment(@RequestParam Long carId, @RequestParam String date, @RequestParam String time, @AuthenticationPrincipal UserDetails userDetails) {
         User user = userService.findByUsername(userDetails.getUsername());
+        
+        // Check if the selected car has an approved bid
+        boolean hasApprovedBid = appointmentService.checkIfCarHasApprovedBid(user, carId);
+        
+        if (!hasApprovedBid) {
+            // Handle case where car does not have an approved bid
+            // Redirect or show an error message
+            return "redirect:/user/home"; // Redirect to user home or appropriate error page
+        }
+        
+        // Book the appointment
         appointmentService.bookAppointment(user, carId, date, time);
-        return "redirect:/user/home";
+        return "redirect:/appointments/book";
     }
     
     @GetMapping("/bidding/post")
@@ -240,12 +279,20 @@ public class UserController {
 
     @PostMapping("/cars/update")
     public String updateCar(@ModelAttribute("carDto") CarDto carDto,
-                            @RequestParam("imageFile") MultipartFile imageFile,
-                            @AuthenticationPrincipal UserDetails userDetails) {
-        User user = userService.findByUsername(userDetails.getUsername());
-        Optional<Car> carOptional = carService.findById(carDto.getId());
-        if (carOptional.isPresent()) {
+                            @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
+                            @AuthenticationPrincipal UserDetails userDetails,
+                            RedirectAttributes redirectAttributes) {
+        try {
+            Optional<Car> carOptional = carService.findById(carDto.getId());
+            if (!carOptional.isPresent()) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Car not found");
+                return "redirect:/user/home";
+            }
+    
+            User user = userService.findByUsername(userDetails.getUsername());
             Car car = carOptional.get();
+    
+            // Update car details
             car.setMake(carDto.getMake());
             car.setModel(carDto.getModel());
             car.setYear(carDto.getYear());
@@ -254,19 +301,45 @@ public class UserController {
             car.setColor(carDto.getColor());
             car.setDescription(carDto.getDescription());
             car.setUser(user);
-            car.setActive(true); // Assuming the car is active after update
-
-            try {
-                if (!imageFile.isEmpty()) {
-                    car.setImageData(imageFile.getBytes());
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
+            car.setActive(true);
+    
+            // Update image if provided
+            if (imageFile != null && !imageFile.isEmpty()) {
+                byte[] imageData = imageFile.getBytes();
+                String imageUrl = saveImageToFileSystem(imageFile);
+                car.setImageData(imageData);
+                car.setImageUrl(imageUrl);
             }
-
+    
             carService.save(car);
+            return "redirect:/user/home";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Failed to update car: " + e.getMessage());
+            return "redirect:/error"; // Redirect to an error page
         }
+    }
+    
 
+    @Value("${upload.path:static/image}")
+    private String uploadPath;
+
+
+    @GetMapping("/bids/appointment/{bidId}")
+    public String selectAppointmentForm(@PathVariable Long bidId, Model model) {
+        Bid bid = bidService.findById(bidId);
+        model.addAttribute("bid", bid);
+        model.addAttribute("availableDates", appointmentService.getAvailableDates());
+        return "user/selectAppointment";
+    }
+
+    @PostMapping("/bids/appointment/{bidId}")
+    public String saveAppointment(@PathVariable Long bidId, @RequestParam String appointmentDate, RedirectAttributes redirectAttributes) {
+        try {
+            appointmentService.saveAppointment(bidId, appointmentDate);
+            redirectAttributes.addFlashAttribute("successMessage", "Appointment date selected successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Failed to select appointment date: " + e.getMessage());
+        }
         return "redirect:/user/home";
     }
 }

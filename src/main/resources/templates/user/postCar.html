@@ -39,10 +39,23 @@
             </div>
             <div>
                 <label for="imageFile">Image:</label>
-                <input type="file" id="imageFile" name="imageFile" accept="image/*" required>
+                <input type="file" id="imageFile" name="imageFile" accept="image/*" required onchange="previewImage(event)">
+                <img id="imagePreview" class="image-preview" src="#" alt="Car Preview" style="max-width: 100%; display: none;">
             </div>
             <button type="submit">Post Car</button>
         </form>
     </div>
+
+    <script th:inline="javascript">
+        function previewImage(event) {
+            var reader = new FileReader();
+            reader.onload = function() {
+                var output = document.getElementById('imagePreview');
+                output.src = reader.result;
+                output.style.display = 'block';
+            };
+            reader.readAsDataURL(event.target.files[0]);
+        }
+    </script>
 </body>
 </html>

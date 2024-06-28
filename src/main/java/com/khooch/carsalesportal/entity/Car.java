@@ -5,7 +5,17 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Transient;
 
 @Entity
 public class Car {
@@ -46,6 +56,9 @@ public class Car {
     @Column(name = "image_data", nullable = true)
     private byte[] imageData;
 
+    @Column(name = "image_url", nullable = true)
+    private String imageUrl;
+
     @OneToMany(mappedBy = "car")
     private List<Bid> bids;
 
@@ -53,10 +66,6 @@ public class Car {
     private BigDecimal highestBidAmount;
 
     // Constructors, getters, and setters
-
-    public Car() {
-        // Default constructor
-    }
 
     // Getters and setters
 
@@ -146,6 +155,14 @@ public class Car {
 
     public void setImageData(byte[] imageData) {
         this.imageData = imageData;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     public List<Bid> getBids() {

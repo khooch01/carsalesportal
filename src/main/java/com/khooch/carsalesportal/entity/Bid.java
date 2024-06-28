@@ -25,6 +25,9 @@ public class Bid {
     @JoinColumn(name = "status_id")
     private BidStatus status;
 
+    @Column(name = "appointment_date")
+    private String appointmentDate;
+
     // Getters and Setters
     public Long getId() {
         return id;
@@ -64,5 +67,13 @@ public class Bid {
 
     public void setStatus(BidStatus status) {
         this.status = status;
+    }
+
+    public String getAppointmentDate() {
+        return appointmentDate;
+    }
+
+    public void setAppointmentDate(String appointmentDate) {
+        this.appointmentDate = appointmentDate;
     }
 }

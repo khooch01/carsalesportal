@@ -11,8 +11,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import com.khooch.carsalesportal.dto.UserRegistrationDto;
+import com.khooch.carsalesportal.entity.Appointment;
 import com.khooch.carsalesportal.entity.Car;
 import com.khooch.carsalesportal.entity.User;
+import com.khooch.carsalesportal.service.AppointmentService;
 import com.khooch.carsalesportal.service.CarService;
 import com.khooch.carsalesportal.service.UserService;
 
@@ -25,6 +27,9 @@ public class LoginController {
     @Autowired
     private CarService carService;
     
+    @Autowired
+    private AppointmentService appointmentService;
+
     @GetMapping("/login")
     public String login() {
         return "login";
@@ -34,7 +39,9 @@ public class LoginController {
     public String userHome(Model model, @AuthenticationPrincipal UserDetails userDetails) {
         User user = userService.findByUsername(userDetails.getUsername());
         List<Car> userCars = carService.findByUser(user);
+        List<Appointment> approvedAppointments = appointmentService.findApprovedByUser(user);
         model.addAttribute("userCars", userCars);
+        model.addAttribute("approvedAppointments", approvedAppointments);
         return "user/home";
     }
 
