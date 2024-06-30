@@ -8,6 +8,7 @@ import com.khooch.carsalesportal.entity.Bid;
 import com.khooch.carsalesportal.entity.BidStatus;
 import com.khooch.carsalesportal.entity.Car;
 import com.khooch.carsalesportal.entity.User;
+import com.khooch.carsalesportal.repository.CarRepository;
 import com.khooch.carsalesportal.service.AppointmentService;
 import com.khooch.carsalesportal.service.BidService;
 import com.khooch.carsalesportal.service.BidStatusService;
@@ -50,15 +51,18 @@ public class UserController {
     private final AppointmentService appointmentService;
     private final BidService bidService;
     private final BidStatusService bidStatusService;
+    private final CarRepository carRepository;
+
 
 
     @Autowired
-    public UserController(UserService userService, CarService carService, AppointmentService appointmentService, BidService bidService, BidStatusService bidStatusService) {
+    public UserController(UserService userService, CarService carService, AppointmentService appointmentService, BidService bidService, BidStatusService bidStatusService, CarRepository carRepository) {
         this.userService = userService;
         this.carService = carService;
         this.appointmentService = appointmentService;
         this.bidService = bidService;
         this.bidStatusService = bidStatusService;
+        this.carRepository = carRepository;
     }
 
     @GetMapping("/login")
@@ -73,22 +77,28 @@ public class UserController {
     }
 
     @PostMapping("/cars/post")
-    public String postCar(@ModelAttribute("carDto") CarDto carDto,
+    public String postCar(@Valid @ModelAttribute("carDto") CarDto carDto,
+                          BindingResult bindingResult,
                           @RequestParam("imageFile") MultipartFile imageFile,
                           @AuthenticationPrincipal UserDetails userDetails,
                           RedirectAttributes redirectAttributes) {
+        if (bindingResult.hasErrors()) {
+            return "user/postCar";
+        }
+
         try {
             // Validate image file if required
             if (imageFile.isEmpty()) {
-                throw new IllegalArgumentException("Image file is required");
+                bindingResult.rejectValue("imageData", "error.imageFile", "Image file is required");
+                return "user/postCar";
             }
-    
+
             // Save the image to a static location
             String imageUrl = saveImageToFileSystem(imageFile);
-    
+
             // Retrieve the user details (assuming you have a userService to find user by username)
             User user = userService.findByUsername(userDetails.getUsername());
-    
+
             // Create a new Car entity from carDto
             Car car = new Car();
             car.setMake(carDto.getMake());
@@ -101,40 +111,21 @@ public class UserController {
             car.setUser(user); // Set the user who posted the car
             car.setImageUrl(imageUrl); // Set image URL
             car.setActive(true);
-    
+
             // Save the Car entity to the database
             carService.save(car);
-    
+
             // Redirect to home page or success page
             return "redirect:/user/home";
         } catch (Exception e) {
             // Handle exceptions, log errors, etc.
             redirectAttributes.addFlashAttribute("errorMessage", "Failed to post car: " + e.getMessage());
-            return "redirect:/error"; // Redirect to an error page
+            return "redirect:/user/cars/post";
         }
     }
     
     private String saveImageToFileSystem(MultipartFile imageFile) throws IOException {
-        // Generate a unique filename using UUID
-        String fileName = UUID.randomUUID().toString() + "_" + imageFile.getOriginalFilename();
-    
-        // Create the upload directory if it doesn't exist
-        Path uploadDirectory = Paths.get(uploadPath);
-        if (!Files.exists(uploadDirectory)) {
-            Files.createDirectories(uploadDirectory);
-        }
-    
-        // Save the file to the file system
-        Path filePath = uploadDirectory.resolve(fileName);
-        Files.copy(imageFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-    
-        // Generate the URL for accessing the image
-        String imageUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path("/image/")
-                .path(fileName)
-                .toUriString();
-    
-        return imageUrl;
+        return "static/image";
     }
     
 
@@ -342,4 +333,5 @@ public class UserController {
         }
         return "redirect:/user/home";
     }
+
 }

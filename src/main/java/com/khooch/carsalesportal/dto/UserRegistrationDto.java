@@ -1,10 +1,24 @@
 package com.khooch.carsalesportal.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+
 public class UserRegistrationDto {
-    private String username; // Changed from email to username
-    private String password;
+    @NotBlank(message = "First name is mandatory")
     private String firstName;
+
+    @NotBlank(message = "Last name is mandatory")
     private String lastName;
+
+    @NotBlank(message = "Username is mandatory")
+    @Size(min = 6, message = "Username must be at least 6 characters long")
+    private String username;
+
+    @NotBlank(message = "Password is mandatory")
+    @Size(min = 8, message = "Password must be at least 8 characters long")
+    @Pattern(regexp = "^(?=.*[!@#$%^&*]).+$", message = "Password must contain at least one special character")
+    private String password;
 
     // Getters and setters
     public String getUsername() {

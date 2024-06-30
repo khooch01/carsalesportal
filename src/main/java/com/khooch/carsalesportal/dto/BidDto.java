@@ -2,10 +2,19 @@ package com.khooch.carsalesportal.dto;
 
 import java.math.BigDecimal;
 
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotNull;
+
 public class BidDto {
 
+    @NotNull(message = "Car ID is required")
     private Long carId;
+
+    @NotNull(message = "Bid amount is required")
+    @DecimalMin(value = "0.0", inclusive = false, message = "Bid amount must be greater than zero")
     private BigDecimal amount;
+
+    @NotNull(message = "User ID is required")
     private Long userId;
     private String status;
 

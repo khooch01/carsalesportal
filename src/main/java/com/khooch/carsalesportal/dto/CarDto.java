@@ -4,14 +4,36 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.khooch.carsalesportal.entity.User;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
+
 public class CarDto {
     private Long id;
+    @NotBlank(message = "Make is required")
     private String make;
+
+    @NotBlank(message = "Model is required")
     private String model;
+
+    @NotNull(message = "Year is required")
+    @Positive(message = "Year must be positive")
     private Integer year;
+
+    @NotNull(message = "Price is required")
+    @Positive(message = "Price must be positive")
     private Integer price;
+
+    @NotNull(message = "Mileage is required")
+    @Positive(message = "Mileage must be positive")
     private Integer mileage;
+
+    @NotBlank(message = "Color is required")
     private String color;
+
+    @NotBlank(message = "Description is required")
+    @Size(max = 1000, message = "Description cannot exceed 1000 characters")
     private String description;
     private User user;
     private byte[] imageData;

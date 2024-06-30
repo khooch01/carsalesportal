@@ -1,6 +1,7 @@
 package com.khooch.carsalesportal.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Positive;
 import java.math.BigDecimal;
 
 @Entity
@@ -10,22 +11,23 @@ public class Bid {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "bid_amount")
+    @Positive(message = "Bid amount must be positive")
+    @Column(name = "bid_amount", nullable = false)
     private BigDecimal bidAmount;
 
     @ManyToOne
-    @JoinColumn(name = "car_id")
+    @JoinColumn(name = "car_id", nullable = false)
     private Car car;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "status_id")
+    @JoinColumn(name = "status_id", nullable = false)
     private BidStatus status;
 
-    @Column(name = "appointment_date")
+    @Column(name = "appointment_date", nullable = false)
     private String appointmentDate;
 
     // Getters and Setters

@@ -5,6 +5,10 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+
 import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -17,15 +21,22 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "username", nullable = false, unique = true) // Changed from email to username
+    @NotBlank(message = "Username is mandatory")
+    @Size(min = 6, message = "Username must be at least 6 characters long")
+    @Column(name = "username", nullable = false, unique = true)
     private String username;
 
+    @NotBlank(message = "Password is mandatory")
+    @Size(min = 8, message = "Password must be at least 8 characters long")
+    @Pattern(regexp = "^(?=.*[!@#$%^&*]).+$", message = "Password must contain at least one special character")
     @Column(name = "password", nullable = false)
     private String password;
 
+    @NotBlank(message = "First name is mandatory")
     @Column(name = "first_name", nullable = false)
     private String firstName;
 
+    @NotBlank(message = "Last name is mandatory")
     @Column(name = "last_name", nullable = false)
     private String lastName;
 

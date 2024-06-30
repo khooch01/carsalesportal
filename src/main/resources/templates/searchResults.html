@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Search Results</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div th:replace="header :: header"></div>
+    <h1>Search Results</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Make</th>
+                <th>Model</th>
+                <th>Year</th>
+                <th>Price</th>
+                <th>Mileage</th>
+                <th>Color</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="car : ${cars}">
+                <td th:text="${car.make}">Make</td>
+                <td th:text="${car.model}">Model</td>
+                <td th:text="${car.year}">Year</td>
+                <td th:text="${car.price}">Price</td>
+                <td th:text="${car.mileage}">Mileage</td>
+                <td th:text="${car.color}">Color</td>
+            </tr>
+        </tbody>
+    </table>
+    <div th:replace="footer :: footer"></div>
+</body>
+</html>

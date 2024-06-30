@@ -1,21 +1,12 @@
 package com.khooch.carsalesportal.entity;
 
+import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
+
 import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Lob;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Transient;
 
 @Entity
 public class Car {
@@ -24,24 +15,32 @@ public class Car {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "Make is mandatory")
     @Column(nullable = false)
     private String make;
 
+    @NotBlank(message = "Model is mandatory")
     @Column(nullable = false)
     private String model;
 
+    @Min(value = 2000, message = "Year must be between 2000 and 2024")
+    @Max(value = 2024, message = "Year must be between 2000 and 2024")
     @Column(nullable = false)
     private Integer year;
 
+    @Min(value = 0, message = "Price must be a positive value")
     @Column(nullable = false)
     private Integer price;
 
+    @Min(value = 0, message = "Mileage must be a positive value")
     @Column(nullable = false)
     private Integer mileage;
 
+    @NotBlank(message = "Color is mandatory")
     @Column(nullable = false)
     private String color;
 
+    @Size(max = 1000, message = "Description must be less than 1000 characters")
     @Column(length = 1000)
     private String description;
 
@@ -64,8 +63,6 @@ public class Car {
 
     @Transient
     private BigDecimal highestBidAmount;
-
-    // Constructors, getters, and setters
 
     // Getters and setters
 

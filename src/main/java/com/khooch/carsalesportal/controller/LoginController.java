@@ -7,16 +7,22 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.khooch.carsalesportal.dto.UserRegistrationDto;
 import com.khooch.carsalesportal.entity.Appointment;
 import com.khooch.carsalesportal.entity.Car;
 import com.khooch.carsalesportal.entity.User;
+import com.khooch.carsalesportal.repository.CarRepository;
 import com.khooch.carsalesportal.service.AppointmentService;
 import com.khooch.carsalesportal.service.CarService;
 import com.khooch.carsalesportal.service.UserService;
+
+import jakarta.validation.Valid;
 
 @Controller
 public class LoginController {
@@ -29,6 +35,7 @@ public class LoginController {
     
     @Autowired
     private AppointmentService appointmentService;
+    private CarRepository carRepository;
 
     @GetMapping("/login")
     public String login() {
@@ -57,8 +64,25 @@ public class LoginController {
     }
 
     @PostMapping("/register")
-    public String registerUserAccount(UserRegistrationDto userDto) {
+    public String registerUserAccount(@Valid @ModelAttribute("user") UserRegistrationDto userDto, BindingResult result, Model model) {
+        if (result.hasErrors()) {
+            return "registration";
+        }
         userService.save(userDto);
         return "redirect:/login";
     }
+
+    
+    @GetMapping("/search")
+    public String searchCars(@RequestParam(required = false) String make,
+                             @RequestParam(required = false) String modelParam,
+                             @RequestParam(required = false) Integer year,
+                             @RequestParam(required = false) Integer priceMin,
+                             @RequestParam(required = false) Integer priceMax,
+                             Model model) {
+        List<Car> searchResults = carRepository.searchCars(make, modelParam, year, priceMin, priceMax);
+        model.addAttribute("cars", searchResults);
+        return "searchResults"; // Name of the view to display search results
+    }
+    
 }

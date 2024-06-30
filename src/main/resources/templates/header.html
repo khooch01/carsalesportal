@@ -7,4 +7,12 @@
             <li><a th:href="@{/logout}">Logout</a></li>
         </ul>
     </nav>
+    <form th:action="@{/search}" method="get">
+        <input type="text" name="make" placeholder="Make" />
+        <input type="text" name="modelParam" placeholder="Model" />
+        <input type="number" name="year" placeholder="Year" />
+        <input type="number" name="priceMin" placeholder="Min Price" />
+        <input type="number" name="priceMax" placeholder="Max Price" />
+        <button type="submit">Search</button>
+    </form>
 </header>
