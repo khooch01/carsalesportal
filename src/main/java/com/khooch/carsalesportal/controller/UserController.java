@@ -17,12 +17,15 @@ import com.khooch.carsalesportal.service.UserService;
 
 import jakarta.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -30,12 +33,16 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.security.Principal;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,6 +59,7 @@ public class UserController {
     private final BidService bidService;
     private final BidStatusService bidStatusService;
     private final CarRepository carRepository;
+    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
 
 
@@ -85,20 +93,20 @@ public class UserController {
         if (bindingResult.hasErrors()) {
             return "user/postCar";
         }
-
+    
         try {
             // Validate image file if required
             if (imageFile.isEmpty()) {
                 bindingResult.rejectValue("imageData", "error.imageFile", "Image file is required");
                 return "user/postCar";
             }
-
-            // Save the image to a static location
+    
+            // Save the image to a static location and get the URL
             String imageUrl = saveImageToFileSystem(imageFile);
-
+    
             // Retrieve the user details (assuming you have a userService to find user by username)
             User user = userService.findByUsername(userDetails.getUsername());
-
+    
             // Create a new Car entity from carDto
             Car car = new Car();
             car.setMake(carDto.getMake());
@@ -111,10 +119,10 @@ public class UserController {
             car.setUser(user); // Set the user who posted the car
             car.setImageUrl(imageUrl); // Set image URL
             car.setActive(true);
-
+    
             // Save the Car entity to the database
             carService.save(car);
-
+    
             // Redirect to home page or success page
             return "redirect:/user/home";
         } catch (Exception e) {
@@ -125,8 +133,31 @@ public class UserController {
     }
     
     private String saveImageToFileSystem(MultipartFile imageFile) throws IOException {
-        return "static/image";
+        // Define the path where images will be saved
+        String uploadDir = "your-upload-directory"; // Update with your actual directory path
+    
+        // Create the directory if it doesn't exist
+        File uploadPath = new File(uploadDir);
+        if (!uploadPath.exists()) {
+            uploadPath.mkdirs(); // Create directories if they don't exist
+        }
+    
+        // Get the original file name
+        String originalFileName = StringUtils.cleanPath(imageFile.getOriginalFilename());
+    
+        // Create a unique file name for the image
+        String fileName = UUID.randomUUID().toString() + "_" + originalFileName;
+    
+        // Define the path where the image will be saved
+        Path filePath = Paths.get(uploadDir, fileName);
+    
+        // Copy the file to the upload path
+        Files.copy(imageFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+    
+        // Return the relative URL to access the image
+        return "/static/image/" + fileName; // Adjust as per your static file serving configuration
     }
+    
     
 
     @GetMapping("/profile/update")
@@ -188,9 +219,8 @@ public class UserController {
         
         // Book the appointment
         appointmentService.bookAppointment(user, carId, date, time);
-        return "redirect:/appointments/book";
+        return "redirect:/user/appointments/book";
     }
-    
     @GetMapping("/bidding/post")
     public String showBiddingForm(Model model) {
         List<Car> availableCars = carService.findAllAvailableCars();

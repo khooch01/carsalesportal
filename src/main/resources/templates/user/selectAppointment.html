@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <title>Select Appointment</title>
-    <link rel="stylesheet" th:href="@{/styles.css}">
+    <link rel="stylesheet" th:href="@{/css/manage-appointment.css}">
 </head>
 <body>
-    <div th:replace="header :: header"></div>
+    <div th:replace="user/header :: header"></div>
     
     <div class="container">
         <h1>Select Appointment Date</h1>
         
-        <form th:action="@{/appointments/book}" method="post">
+        <form th:action="@{/user/appointments/book}" method="post">
             <label for="carId">Select Car:</label>
             <select id="carId" name="carId">
                 <option th:each="car : ${userCars}" th:value="${car.id}" th:text="${car.make + ' ' + car.model}">Car</option>

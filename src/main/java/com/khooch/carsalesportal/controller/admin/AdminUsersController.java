@@ -1,9 +1,13 @@
 package com.khooch.carsalesportal.controller.admin;
 
+import com.khooch.carsalesportal.dto.UserDto;
 import com.khooch.carsalesportal.entity.Role;
 import com.khooch.carsalesportal.entity.User;
 import com.khooch.carsalesportal.service.RoleService;
 import com.khooch.carsalesportal.service.UserService;
+
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -63,5 +67,32 @@ public class AdminUsersController {
     public String deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
         return "redirect:/admin/users";
+    }
+
+    @GetMapping("/admin/profile/update")
+    public String updateUserProfileForm(Model model, @AuthenticationPrincipal UserDetails userDetails) {
+        User user = userService.findByUsername(userDetails.getUsername());
+        UserDto userDto = new UserDto();
+        userDto.setId(user.getId());
+        userDto.setUsername(user.getUsername());
+        userDto.setFirstName(user.getFirstName());
+        userDto.setLastName(user.getLastName());
+        // Do not set password here as we don't want to display it in the form
+        model.addAttribute("userDto", userDto);
+        return "admin/profile";
+    }
+
+    @PostMapping("/admin/profile/update")
+    public String updateUserProfile(@ModelAttribute("userDto") UserDto userDto) {
+        User user = userService.findById(userDto.getId());
+        user.setUsername(userDto.getUsername());
+        user.setFirstName(userDto.getFirstName());
+        user.setLastName(userDto.getLastName());
+        if (userDto.getPassword() != null && !userDto.getPassword().isEmpty()) {
+            // Update password only if a new password is provided
+            user.setPassword(userDto.getPassword());
+        }
+        userService.save(user);
+        return "redirect:/admin/home";
     }
 }

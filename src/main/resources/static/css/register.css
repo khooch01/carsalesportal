@@ -1,63 +1,80 @@
-/* register.css */
+/* registration.css */
+
+/* General Styles */
 body {
     font-family: Arial, sans-serif;
     background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
-    margin: 0;
-}
-
-form {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    width: 300px;
-    text-align: center;
 }
 
 h1 {
+    text-align: center;
     color: #333;
+    margin-bottom: 20px;
+}
+
+form {
+    background: #fff;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+    box-sizing: border-box;
+}
+
+div.form-group {
     margin-bottom: 20px;
 }
 
 label {
     display: block;
-    margin-bottom: 8px;
+    margin-bottom: 5px;
     color: #333;
 }
 
 input[type="text"],
 input[type="password"] {
-    width: calc(100% - 22px);
-    padding: 10px;
-    margin-bottom: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-}
-
-button {
     width: 100%;
     padding: 10px;
-    border: none;
-    border-radius: 5px;
-    background-color: #007BFF;
-    color: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+button[type="submit"] {
+    width: 100%;
+    padding: 10px;
+    border: 0;
+    border-radius: 4px;
     cursor: pointer;
+    background: #007BFF;
+    color: #fff;
     font-size: 16px;
 }
 
-button:hover {
-    background-color: #0056b3;
+button[type="submit"]:hover {
+    background: #0056b3;
 }
 
-p {
-    color: rgb(0, 0, 0);
-    font-size: 14px;
-}
-.error-message {
+span {
     color: red;
-    font-size: 0.9em;
+    font-size: 14px;
+    display: block;
+    margin-top: 5px;
+}
+
+.login-container {
+    background: #fff;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
 }

@@ -220,4 +220,9 @@ public class CarServiceImpl implements CarService {
             throw new IllegalStateException("Bid status 'APPROVED' not found");
         }
     }
+
+    @Override
+    public List<Car> getAvailableCars() {
+        return carRepository.findAll(); // Or any other logic to fetch available cars
+    }
 }

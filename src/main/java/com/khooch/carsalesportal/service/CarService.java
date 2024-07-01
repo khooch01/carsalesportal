@@ -35,4 +35,5 @@ public interface CarService {
     List<Car> findAllAvailableCars();
     double calculateHighestPrice(List<Car> cars);
     List<Car> findCarsWithApprovedBidsByUser(User user);
+    List<Car> getAvailableCars();
 }

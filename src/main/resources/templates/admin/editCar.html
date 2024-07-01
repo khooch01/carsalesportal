@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <title>Edit Car</title>
-    <link rel="stylesheet" th:href="@{/admin.css}">
+    <link rel="stylesheet" th:href="@{/css/edit-car.css}">
 </head>
 <body>
-    <div th:replace="header :: header"></div>
+    <div th:replace="admin/header :: header"></div>
     <div>
         <h1>Edit Car</h1>
         <form th:action="@{/admin/cars/edit/{id}(id=${car.id})}" th:object="${car}" method="post">

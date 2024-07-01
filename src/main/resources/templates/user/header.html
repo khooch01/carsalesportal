@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Page Title</title>
+    <link rel="stylesheet" th:href="@{/css/header.css}">
+</head>
+<body>
+    <header th:fragment="header">
+        <!-- Header content goes here -->
+        <nav>
+            <div class="nav-links">
+                <a th:href="@{/admin/home}">Dashboard</a>
+                <a th:href="@{/admin/profile/update}">Profile</a>
+                <a th:href="@{/logout}">Logout</a>
+            </div>
+            <form th:action="@{/search}" method="get" class="search-form">
+                <input type="text" name="make" placeholder="Make" />
+                <input type="text" name="modelParam" placeholder="Model" />
+                <input type="number" name="year" placeholder="Year" />
+                <input type="number" name="priceMin" placeholder="Min Price" />
+                <input type="number" name="priceMax" placeholder="Max Price" />
+                <button type="submit">Search</button>
+            </form>
+        </nav>
+    </header>
+    <!-- Page content goes here -->
+</body>
+</html>
