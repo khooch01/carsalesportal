@@ -11,6 +11,7 @@ import com.khooch.carsalesportal.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -146,4 +147,25 @@ public class UserServiceImpl implements UserService {
         throw new UnsupportedOperationException("Unimplemented method 'saveNewUser'");
     }
     
+    public boolean registerUser(User user) {
+        if (userRepository.findByUsername(user.getUsername()) != null) {
+            return false; // Username already exists
+        }
+        if (!user.getPassword().matches("^(?=.*[!@#$%^&*]).+$")) {
+            return false; // Weak password
+        }
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        userRepository.save(user);
+        return true;
+    }
+
+    public UserDetails login(String username, String password) {
+        User user = userRepository.findByUsername(username);
+        if (user == null || !passwordEncoder.matches(password, user.getPassword())) {
+            throw new BadCredentialsException("Incorrect username or password");
+        }
+        return user;
+    }
+
+
 }

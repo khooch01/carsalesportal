@@ -138,7 +138,7 @@ public class UserController {
     
     private String saveImageToFileSystem(MultipartFile imageFile) throws IOException {
         // Define the path where images will be saved
-        String uploadDir = "your-upload-directory"; // Update with your actual directory path
+        String uploadDir = "src/main/resources/static/image"; // Update with your actual directory path
     
         // Create the directory if it doesn't exist
         File uploadPath = new File(uploadDir);
@@ -159,7 +159,7 @@ public class UserController {
         Files.copy(imageFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
     
         // Return the relative URL to access the image
-        return "/static/image/" + fileName; // Adjust as per your static file serving configuration
+        return "src/main/resources/static/image" + fileName; // Adjust as per your static file serving configuration
     }
     
     
