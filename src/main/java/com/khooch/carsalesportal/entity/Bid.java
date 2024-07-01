@@ -3,6 +3,7 @@ package com.khooch.carsalesportal.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Positive;
 import java.math.BigDecimal;
+import java.util.Date; // Import Date class for handling dates
 
 @Entity
 public class Bid {
@@ -11,7 +12,6 @@ public class Bid {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Positive(message = "Bid amount must be positive")
     @Column(name = "bid_amount", nullable = false)
     private BigDecimal bidAmount;
 
@@ -27,8 +27,7 @@ public class Bid {
     @JoinColumn(name = "status_id", nullable = false)
     private BidStatus status;
 
-    @Column(name = "appointment_date", nullable = false)
-    private String appointmentDate;
+    // Constructors, getters, and setters
 
     // Getters and Setters
     public Long getId() {
@@ -69,13 +68,5 @@ public class Bid {
 
     public void setStatus(BidStatus status) {
         this.status = status;
-    }
-
-    public String getAppointmentDate() {
-        return appointmentDate;
-    }
-
-    public void setAppointmentDate(String appointmentDate) {
-        this.appointmentDate = appointmentDate;
     }
 }

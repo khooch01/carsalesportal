@@ -10,8 +10,8 @@
         <!-- Header content goes here -->
         <nav>
             <div class="nav-links">
-                <a th:href="@{/admin/home}">Dashboard</a>
-                <a th:href="@{/admin/profile/update}">Profile</a>
+                <a th:href="@{/user/home}">Dashboard</a>
+                <a th:href="@{/user/profile/update}">Profile</a>
                 <a th:href="@{/logout}">Logout</a>
             </div>
             <form th:action="@{/search}" method="get" class="search-form">
@@ -22,6 +22,8 @@
                 <input type="number" name="priceMax" placeholder="Max Price" />
                 <button type="submit">Search</button>
             </form>
+            
+            
         </nav>
     </header>
     <!-- Page content goes here -->

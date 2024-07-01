@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -41,8 +42,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.security.Principal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -204,78 +208,84 @@ public class UserController {
         return "user/selectAppointment";
     }
 
-    @PostMapping("/appointments/book")
-    public String bookAppointment(@RequestParam Long carId, @RequestParam String date, @RequestParam String time, @AuthenticationPrincipal UserDetails userDetails) {
-        User user = userService.findByUsername(userDetails.getUsername());
-        
-        // Check if the selected car has an approved bid
-        boolean hasApprovedBid = appointmentService.checkIfCarHasApprovedBid(user, carId);
-        
-        if (!hasApprovedBid) {
-            // Handle case where car does not have an approved bid
-            // Redirect or show an error message
-            return "redirect:/user/home"; // Redirect to user home or appropriate error page
-        }
-        
+@PostMapping("/appointments/book")
+public String bookAppointment(@RequestParam Long carId, @RequestParam String date,
+                              @RequestParam String time, @AuthenticationPrincipal UserDetails userDetails,
+                              RedirectAttributes redirectAttributes) {
+    User user = userService.findByUsername(userDetails.getUsername());
+    
+    try {
         // Book the appointment
         appointmentService.bookAppointment(user, carId, date, time);
-        return "redirect:/user/appointments/book";
+        redirectAttributes.addFlashAttribute("successMessage", "Appointment booked successfully!");
+    } catch (Exception e) {
+        redirectAttributes.addFlashAttribute("errorMessage", "Failed to book appointment: " + e.getMessage());
     }
+    
+    return "redirect:/user/appointments/book";
+}
+
+    
     @GetMapping("/bidding/post")
     public String showBiddingForm(Model model) {
         List<Car> availableCars = carService.findAllAvailableCars();
         Map<Long, BigDecimal> highestBidPrices = new HashMap<>();
     
+        // Retrieve highest bid prices for available cars
         for (Car car : availableCars) {
             Optional<Bid> highestBid = bidService.findHighestBidForCar(car.getId());
             highestBid.ifPresent(bid -> highestBidPrices.put(car.getId(), bid.getBidAmount()));
         }
     
+        // Prepare a new BidDto instance for the form
         BidDto bidDto = new BidDto();
+    
+        // Add attributes to the model for Thymeleaf template rendering
         model.addAttribute("availableCars", availableCars);
         model.addAttribute("highestBidPrices", highestBidPrices);
         model.addAttribute("bidDto", bidDto);
-        model.addAttribute("successMessage", ""); // Add an empty success message
-        model.addAttribute("errorMessage", ""); // Add an empty error message
+        model.addAttribute("successMessage", ""); // Initialize empty success message
+        model.addAttribute("errorMessage", ""); // Initialize empty error message
     
-        return "user/postBidding";
+        return "user/postBidding"; // Return the view name
     }
 
-    @PostMapping("/bidding/post")
-    public String postBid(@ModelAttribute("bidDto") @Validated BidDto bidDto,
-                          BindingResult bindingResult,
-                          RedirectAttributes redirectAttributes,
-                          @AuthenticationPrincipal UserDetails userDetails) {
-        if (bindingResult.hasErrors()) {
-            return "user/postBidding";
-        }
-
-        try {
-            User user = userService.findByUsername(userDetails.getUsername());
-            Optional<Car> carOptional = carService.findById(bidDto.getCarId());
-            if (!carOptional.isPresent()) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Car not found");
-                return "redirect:/user/bidding/post";
-            }
-
-            Car car = carOptional.get();
-
-            Bid bid = new Bid();
-            bid.setBidAmount(bidDto.getAmount());
-            bid.setCar(car);
-            bid.setUser(user);
-
-            // Find or create BidStatus "Pending"
-            BidStatus pendingStatus = bidStatusService.findOrCreateByName("Pending");
-            bid.setStatus(pendingStatus); // Set BidStatus object
-
-            bidService.save(bid);
-            redirectAttributes.addFlashAttribute("successMessage", "Bid posted successfully!");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Failed to post bid: " + e.getMessage());
-        }
-        return "redirect:/user/bidding/post";
+@PostMapping("/bidding/post")
+public String postBid(@ModelAttribute("bidDto") @Validated BidDto bidDto,
+                      BindingResult bindingResult,
+                      RedirectAttributes redirectAttributes,
+                      @AuthenticationPrincipal UserDetails userDetails) {
+    if (bindingResult.hasErrors()) {
+        return "error";
     }
+
+    try {
+        User user = userService.findByUsername(userDetails.getUsername());
+        Optional<Car> carOptional = carService.findById(bidDto.getCarId());
+        if (!carOptional.isPresent()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Car not found");
+            return "redirect:/user/bidding/post";
+        }
+
+        Car car = carOptional.get();
+
+        Bid bid = new Bid();
+        bid.setBidAmount(bidDto.getAmount());
+        bid.setCar(car);
+        bid.setUser(user);
+
+        // Find or create BidStatus "Pending"
+        BidStatus pendingStatus = bidStatusService.findOrCreateByName("Pending");
+        bid.setStatus(pendingStatus); // Set BidStatus object
+
+        bidService.save(bid);
+        redirectAttributes.addFlashAttribute("successMessage", "Bid posted successfully!");
+    } catch (Exception e) {
+        redirectAttributes.addFlashAttribute("errorMessage", "Failed to post bid: " + e.getMessage());
+    }
+    return "redirect:/user/bidding/post";
+}
+
 
     @GetMapping("/cars/edit/{id}")
     public String editCarForm(@PathVariable Long id, Model model) {
@@ -353,15 +363,23 @@ public class UserController {
         return "user/selectAppointment";
     }
 
-    @PostMapping("/bids/appointment/{bidId}")
-    public String saveAppointment(@PathVariable Long bidId, @RequestParam String appointmentDate, RedirectAttributes redirectAttributes) {
-        try {
-            appointmentService.saveAppointment(bidId, appointmentDate);
-            redirectAttributes.addFlashAttribute("successMessage", "Appointment date selected successfully!");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Failed to select appointment date: " + e.getMessage());
-        }
-        return "redirect:/user/home";
+@PostMapping("/bids/appointment/{bidId}")
+public String saveAppointment(@PathVariable Long bidId, @RequestParam String appointmentDateStr, RedirectAttributes redirectAttributes) {
+    try {
+        // Parse the String appointmentDateStr to Date
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date appointmentDate = dateFormat.parse(appointmentDateStr);
+
+        // Call the service method with the correct Date object
+        appointmentService.saveAppointment(bidId, appointmentDate);
+        redirectAttributes.addFlashAttribute("successMessage", "Appointment date selected successfully!");
+    } catch (ParseException e) {
+        redirectAttributes.addFlashAttribute("errorMessage", "Invalid date format. Please provide date in yyyy-MM-dd format.");
+    } catch (Exception e) {
+        redirectAttributes.addFlashAttribute("errorMessage", "Failed to select appointment date: " + e.getMessage());
     }
+    return "redirect:/user/home";
+}
+
 
 }

@@ -30,4 +30,5 @@ public interface CarRepository extends JpaRepository<Car, Long> {
                          @Param("year") Integer year,
                          @Param("priceMin") Integer priceMin,
                          @Param("priceMax") Integer priceMax);
+    List<Car> findAll(); // Add this method
 }

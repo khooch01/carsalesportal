@@ -4,24 +4,29 @@
     <title>Post Bidding</title>
 </head>
 <body>
+    <div th:replace="user/header :: header"></div>
     <h1>Post a Bid</h1>
-
     <form th:action="@{/user/bidding/post}" th:object="${bidDto}" method="post">
         <div>
             <label for="car">Car:</label>
             <select id="car" th:field="*{carId}">
                 <option th:each="car : ${availableCars}" th:value="${car.id}" th:text="${car.make + ' ' + car.model}"></option>
             </select>
+            <span th:if="${#fields.hasErrors('carId')}" th:errors="*{carId}"></span>
         </div>
         <div>
             <label for="amount">Bid Amount:</label>
             <input type="number" id="amount" th:field="*{amount}" required/>
+            <span th:if="${#fields.hasErrors('amount')}" th:errors="*{amount}"></span>
         </div>
+        <input type="hidden" th:field="*{userId}" th:value="${userId}"/>
         <div>
             <button type="submit">Submit Bid</button>
         </div>
+        <div th:if="${successMessage}" class="success-message" th:text="${successMessage}"></div>
+        <div th:if="${errorMessage}" class="error-message" th:text="${errorMessage}"></div>
     </form>
-
+    
     <div th:if="${successMessage}">
         <p th:text="${successMessage}"></p>
     </div>

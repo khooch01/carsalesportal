@@ -225,4 +225,21 @@ public class CarServiceImpl implements CarService {
     public List<Car> getAvailableCars() {
         return carRepository.findAll(); // Or any other logic to fetch available cars
     }
+
+    @Override
+    public List<CarDto> searchCars(String make, String model, Integer year, Integer priceMin, Integer priceMax) {
+        List<Car> cars;
+
+        // Check if all parameters are null
+        if (make == null && model == null && year == null && priceMin == null && priceMax == null) {
+            cars = carRepository.findAll();
+        } else {
+            cars = carRepository.searchCars(make, model, year, priceMin, priceMax);
+        }
+
+        // Map the Car list to CarDto list
+        return cars.stream()
+                   .map(CarDto::new) // Using constructor reference
+                   .collect(Collectors.toList());
+    }
 }

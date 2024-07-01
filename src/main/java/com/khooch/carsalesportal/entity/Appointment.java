@@ -23,7 +23,13 @@ public class Appointment {
     @JoinColumn(name = "car_id")
     private Car car;
 
-    // Constructors, getters, and setters
+    @OneToOne
+    @JoinColumn(name = "bid_id")
+    private Bid bid;
+
+    // Constructors
+    public Appointment() {
+    }
 
     // Getters and Setters
     public Long getId() {
@@ -50,6 +56,14 @@ public class Appointment {
         this.approved = approved;
     }
 
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
     public User getUser() {
         return user;
     }
@@ -66,11 +80,11 @@ public class Appointment {
         this.car = car;
     }
 
-    public String getStatus() {
-        return status;
+    public Bid getBid() {
+        return bid;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
+    public void setBid(Bid bid) {
+        this.bid = bid;
     }
 }

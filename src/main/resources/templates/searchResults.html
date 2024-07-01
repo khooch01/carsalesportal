@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Search Results</title>
-    <link rel="stylesheet" th:href="@{/css/searchResults.css}">
-</head>
+    <head>
+        <meta charset="UTF-8">
+        <title>Search Results</title>
+        <link rel="stylesheet" href="/css/searchResult.css">
+    </head>    
 <body>
-    <div th:replace="header :: header"></div>
+    <div th:replace="user/header :: header"></div>
     <h1>Search Results</h1>
     <table>
         <thead>
@@ -17,6 +17,7 @@
                 <th>Price</th>
                 <th>Mileage</th>
                 <th>Color</th>
+                <th>Description</th>
             </tr>
         </thead>
         <tbody>
@@ -27,9 +28,9 @@
                 <td th:text="${car.price}">Price</td>
                 <td th:text="${car.mileage}">Mileage</td>
                 <td th:text="${car.color}">Color</td>
+                <td th:text="${car.description}">Description</td>
             </tr>
         </tbody>
     </table>
-    <div th:replace="footer :: footer"></div>
 </body>
 </html>

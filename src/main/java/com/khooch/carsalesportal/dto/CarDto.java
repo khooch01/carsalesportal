@@ -1,7 +1,6 @@
 package com.khooch.carsalesportal.dto;
 
-import org.springframework.web.multipart.MultipartFile;
-
+import com.khooch.carsalesportal.entity.Car;
 import com.khooch.carsalesportal.entity.User;
 
 import jakarta.validation.constraints.NotBlank;
@@ -11,6 +10,7 @@ import jakarta.validation.constraints.Size;
 
 public class CarDto {
     private Long id;
+    
     @NotBlank(message = "Make is required")
     private String make;
 
@@ -35,9 +35,28 @@ public class CarDto {
     @NotBlank(message = "Description is required")
     @Size(max = 1000, message = "Description cannot exceed 1000 characters")
     private String description;
+
     private User user;
     private byte[] imageData;
-    
+
+    // Default constructor
+    public CarDto() {}
+
+    // Constructor that takes a Car entity
+    public CarDto(Car car) {
+        this.id = car.getId();
+        this.make = car.getMake();
+        this.model = car.getModel();
+        this.year = car.getYear();
+        this.price = car.getPrice();
+        this.mileage = car.getMileage();
+        this.color = car.getColor();
+        this.description = car.getDescription();
+        this.user = car.getUser();
+        this.imageData = car.getImageData();
+    }
+
+    // Getters and setters
     public Long getId() {
         return id;
     }
@@ -45,7 +64,7 @@ public class CarDto {
     public void setId(Long id) {
         this.id = id;
     }
-    // Getters and setters
+
     public String getMake() {
         return make;
     }
@@ -101,6 +120,7 @@ public class CarDto {
     public void setDescription(String description) {
         this.description = description;
     }
+
     public User getUser() {
         return user;
     }

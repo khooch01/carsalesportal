@@ -10,7 +10,6 @@
     
     <div class="container">
         <h1>Select Appointment Date</h1>
-        
         <form th:action="@{/user/appointments/book}" method="post">
             <label for="carId">Select Car:</label>
             <select id="carId" name="carId">
@@ -25,6 +24,8 @@
             
             <button type="submit">Book Appointment</button>
         </form>
+        <div th:if="${successMessage}" class="success-message" th:text="${successMessage}"></div>
+        <div th:if="${errorMessage}" class="error-message" th:text="${errorMessage}"></div>
     </div>
     
     <div th:replace="footer :: footer"></div>

@@ -4,6 +4,7 @@ import com.khooch.carsalesportal.dto.AppointmentDto;
 import com.khooch.carsalesportal.entity.Appointment;
 import com.khooch.carsalesportal.entity.User;
 
+import java.util.Date;
 import java.util.List;
 
 public interface AppointmentService {
@@ -16,7 +17,7 @@ public interface AppointmentService {
     List<Appointment> getAllAppointments();
     void bookAppointment(User user, Long carId, String date, String time);
     List<String> getAvailableDates();
-    void saveAppointment(Long bidId, String appointmentDate);
+    void saveAppointment(Long bidId, Date appointmentDate);
     List<Appointment> findApprovedByUser(User user);
     boolean checkIfCarHasApprovedBid(User user, Long carId);
 }

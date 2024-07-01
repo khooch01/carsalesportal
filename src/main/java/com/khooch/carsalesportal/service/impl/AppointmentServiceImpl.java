@@ -10,6 +10,7 @@ import com.khooch.carsalesportal.repository.BidRepository;
 import com.khooch.carsalesportal.repository.CarRepository;
 import com.khooch.carsalesportal.repository.UserRepository;
 import com.khooch.carsalesportal.service.AppointmentService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -28,6 +29,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final CarRepository carRepository;
     private final BidRepository bidRepository;
 
+    @Autowired
     public AppointmentServiceImpl(AppointmentRepository appointmentRepository, UserRepository userRepository, CarRepository carRepository, BidRepository bidRepository) {
         this.appointmentRepository = appointmentRepository;
         this.userRepository = userRepository;
@@ -92,6 +94,7 @@ public class AppointmentServiceImpl implements AppointmentService {
             throw new IllegalArgumentException("Appointment with id " + appointmentId + " not found");
         }
     }
+
     @Override
     public void bookAppointment(User user, Long carId, String date, String time) {
         Car car = carRepository.findById(carId)
@@ -110,7 +113,6 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         appointmentRepository.save(appointment);
     }
-
     // Method to parse date and time strings into LocalDateTime
     private LocalDateTime parseDateTime(String date, String time) {
         // Format date and time strings
@@ -130,13 +132,6 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
-    public void saveAppointment(Long bidId, String appointmentDate) {
-        Bid bid = bidRepository.findById(bidId).orElseThrow(() -> new IllegalArgumentException("Bid not found"));
-        bid.setAppointmentDate(appointmentDate);
-        bidRepository.save(bid);
-    }
-
-    @Override
     public List<Appointment> findApprovedByUser(User user) {
         return appointmentRepository.findByUserAndStatus(user, "Approved");
     }
@@ -148,5 +143,21 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         // Check if there is an approved bid for the specified car
         return bid != null && "Approved".equals(bid.getStatus().getName()); // Assuming BidStatus is accessible via bid.getStatus()
+    }
+
+    @Override
+    public void saveAppointment(Long bidId, Date appointmentDate) {
+        // Retrieve the Bid entity from repository
+        Bid bid = bidRepository.findById(bidId)
+                            .orElseThrow(() -> new IllegalArgumentException("Bid not found"));
+
+        // Create new Appointment entity
+        Appointment appointment = new Appointment();
+        appointment.setBid(bid);
+        appointment.setAppointmentDate(appointmentDate);
+        appointment.setApproved(false); // Assuming default is not approved
+
+        // Save the appointment
+        appointmentRepository.save(appointment);
     }
 }

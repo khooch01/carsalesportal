@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.khooch.carsalesportal.dto.CarDto;
 import com.khooch.carsalesportal.dto.UserRegistrationDto;
 import com.khooch.carsalesportal.entity.Appointment;
 import com.khooch.carsalesportal.entity.Car;
@@ -72,7 +73,6 @@ public class LoginController {
         return "redirect:/login";
     }
 
-    
     @GetMapping("/search")
     public String searchCars(@RequestParam(required = false) String make,
                              @RequestParam(required = false) String modelParam,
@@ -80,9 +80,8 @@ public class LoginController {
                              @RequestParam(required = false) Integer priceMin,
                              @RequestParam(required = false) Integer priceMax,
                              Model model) {
-        List<Car> searchResults = carRepository.searchCars(make, modelParam, year, priceMin, priceMax);
+        List<CarDto> searchResults = carService.searchCars(make, modelParam, year, priceMin, priceMax);
         model.addAttribute("cars", searchResults);
         return "searchResults"; // Name of the view to display search results
     }
-    
 }

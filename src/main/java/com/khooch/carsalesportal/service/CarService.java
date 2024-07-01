@@ -36,4 +36,5 @@ public interface CarService {
     double calculateHighestPrice(List<Car> cars);
     List<Car> findCarsWithApprovedBidsByUser(User user);
     List<Car> getAvailableCars();
+    List<CarDto> searchCars(String make, String model, Integer year, Integer priceMin, Integer priceMax);
 }

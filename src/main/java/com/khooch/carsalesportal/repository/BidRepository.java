@@ -20,8 +20,6 @@ public interface BidRepository extends JpaRepository<Bid, Long> {
 
     Optional<Bid> findTopByCarIdOrderByBidAmountDesc(Long carId);
 
-    @Query("SELECT b FROM Bid b WHERE b.appointmentDate IS NOT NULL ORDER BY b.appointmentDate ASC")
-    List<Bid> findAllWithAppointmentDatesOrdered();
 
     List<Bid> findByUserAndStatusName(User user, String statusName);
     List<Bid> findByUser(User user);
